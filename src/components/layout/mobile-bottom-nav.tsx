@@ -1,0 +1,46 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { mobileNav } from "@/lib/nav";
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function MobileBottomNav() {
+  const pathname = usePathname();
+
+  return (
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-amber-100/90 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      aria-label="Нижняя навигация"
+    >
+      <ul className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1">
+        {mobileNav.map(({ href, label, icon: Icon }) => {
+          const active = isActive(pathname, href);
+          return (
+            <li key={href} className="flex-1">
+              <Link
+                href={href}
+                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1.5 text-[10px] font-medium transition active:scale-95 ${
+                  active
+                    ? "text-teal-700"
+                    : "text-stone-500 hover:text-stone-700"
+                }`}
+                aria-current={active ? "page" : undefined}
+              >
+                <Icon
+                  className={`h-5 w-5 shrink-0 ${active ? "text-teal-600" : ""}`}
+                  aria-hidden
+                />
+                <span className="max-w-full truncate">{label}</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
