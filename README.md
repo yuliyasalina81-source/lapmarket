@@ -23,6 +23,12 @@
 - Tailwind CSS 4
 - lucide-react
 
+## Сайт в интернете
+
+**https://lapmarket.vercel.app**
+
+Подробности деплоя, GitHub и своего домена — в [DEPLOY.md](./DEPLOY.md).
+
 ## Запуск
 
 ```bash
