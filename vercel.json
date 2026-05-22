@@ -1,0 +1,10 @@
+{
+  "installCommand": "npm install",
+  "buildCommand": "prisma generate && env -u NEXT_ADAPTER_PATH next build --webpack",
+  "crons": [
+    {
+      "path": "/api/cron/reminders",
+      "schedule": "0 8 * * *"
+    }
+  ]
+}

@@ -1,22 +1,26 @@
 "use client";
 
-import type { AnimalListing } from "@/types";
+import Link from "next/link";
 import { formatPrice } from "@/lib/format";
+import { getListingMainImage } from "@/lib/queries/animals";
 import { AnimalBadge, PassportIcon } from "./animal-badge";
+import { ProductImage } from "@/components/ui/product-image";
 import { motion } from "framer-motion";
 import { Heart, MapPin } from "lucide-react";
+import type { ListingWithRelations } from "@/lib/queries/animals";
 
-interface AnimalCardProps {
-  animal: AnimalListing;
-  onBuy?: (animal: AnimalListing) => void;
-  onContact?: (animal: AnimalListing) => void;
-}
-
-export function AnimalCard({ animal, onBuy, onContact }: AnimalCardProps) {
-  const isPedigree = animal.badges.includes("pedigree");
-  const isGoodHands = animal.badges.includes("goodHands");
+export function AnimalCard({
+  listing,
+  onContact,
+}: {
+  listing: ListingWithRelations;
+  onContact?: (listing: ListingWithRelations) => void;
+}) {
+  const imageUrl = getListingMainImage(listing);
+  const isPedigree = listing.badges.includes("PEDIGREE");
+  const isGoodHands = listing.badges.includes("GOOD_HANDS");
   const buyLabel =
-    animal.kind === "cat" ? "Купить котёнка" : "Купить щенка";
+    listing.kind === "CAT" ? "Купить котёнка" : "Купить щенка";
 
   return (
     <motion.article
@@ -24,14 +28,8 @@ export function AnimalCard({ animal, onBuy, onContact }: AnimalCardProps) {
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className="flex flex-col overflow-hidden rounded-2xl border border-white/80 bg-white shadow-sm shadow-stone-900/5"
     >
-      <div
-        className={`relative flex h-44 items-center justify-center text-6xl ${
-          isGoodHands
-            ? "bg-gradient-to-br from-red-50 via-white to-rose-50"
-            : "bg-gradient-to-br from-emerald-50 via-white to-violet-50"
-        }`}
-      >
-        {animal.image}
+      <Link href={`/animals/${listing.id}`} className="relative block h-44">
+        <ProductImage src={imageUrl} alt={listing.name} fill />
         {isPedigree && (
           <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg">
             <span className="text-sm font-bold">✓</span>
@@ -42,62 +40,60 @@ export function AnimalCard({ animal, onBuy, onContact }: AnimalCardProps) {
             <Heart className="h-4 w-4 fill-white" />
           </span>
         )}
-      </div>
+      </Link>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex flex-wrap items-center gap-2">
-          {animal.badges.map((b) => (
+          {listing.badges.map((b) => (
             <AnimalBadge key={b} type={b} />
           ))}
           {isPedigree && <PassportIcon />}
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-stone-900">{animal.name}</h3>
+          <Link href={`/animals/${listing.id}`}>
+            <h3 className="text-lg font-semibold text-stone-900 hover:text-emerald-700">
+              {listing.name}
+            </h3>
+          </Link>
           <p className="mt-0.5 flex items-center gap-1 text-sm text-stone-500">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
-            {animal.breed ?? "Метис"} · {animal.age} · {animal.city}
+            {listing.breed ?? "Метис"} · {listing.age} · {listing.city}
           </p>
         </div>
-        <p className="line-clamp-2 text-sm text-stone-600">{animal.description}</p>
+        <p className="line-clamp-2 text-sm text-stone-600">{listing.description}</p>
         <div className="mt-auto space-y-3 pt-2">
-          {isPedigree && animal.price && (
+          {isPedigree && listing.price && (
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-3">
-              <p className="text-xs font-medium text-emerald-800">
-                Покупка с документами
-              </p>
+              <p className="text-xs font-medium text-emerald-800">Покупка с документами</p>
               <p className="mt-1 text-2xl font-bold text-emerald-700">
-                {formatPrice(animal.price)}
+                {formatPrice(listing.price)}
               </p>
-              <motion.button
-                type="button"
-                whileTap={{ scale: 0.97 }}
-                onClick={() => onBuy?.(animal)}
-                className="mt-3 w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-500/25 hover:bg-emerald-600"
+              <Link
+                href={`/animals/${listing.id}`}
+                className="mt-3 block w-full rounded-xl bg-emerald-500 py-2.5 text-center text-sm font-semibold text-white hover:bg-emerald-600"
               >
                 {buyLabel}
-              </motion.button>
+              </Link>
             </div>
           )}
           {isGoodHands ? (
             <>
               <span className="text-lg font-bold text-red-500">В добрые руки</span>
-              <motion.button
+              <button
                 type="button"
-                whileTap={{ scale: 0.97 }}
-                onClick={() => onContact?.(animal)}
-                className="w-full rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white shadow-md shadow-red-500/25 hover:bg-red-600"
+                onClick={() => onContact?.(listing)}
+                className="w-full rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white hover:bg-red-600"
               >
                 Забрать / Связаться
-              </motion.button>
+              </button>
             </>
           ) : (
-            <motion.button
+            <button
               type="button"
-              whileTap={{ scale: 0.97 }}
-              onClick={() => onContact?.(animal)}
-              className="w-full rounded-xl border-2 border-emerald-500 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+              onClick={() => onContact?.(listing)}
+              className="w-full rounded-xl border-2 border-emerald-500 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
             >
               Связаться
-            </motion.button>
+            </button>
           )}
         </div>
       </div>

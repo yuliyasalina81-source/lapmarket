@@ -50,9 +50,17 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Connecting Vercel to Git repository..."
-$remote = git remote get-url origin
+$remote = git remote get-url origin 2>$null
+if (-not $remote) {
+    Write-Host "ERROR: no git remote. See DEPLOY.md (manual GitHub steps)."
+    exit 1
+}
 npx vercel git connect $remote --yes
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "WARN: vercel git connect failed. Link repo in Vercel dashboard."
+}
 
+$repoUrl = & $Gh repo view $repoName --json url -q .url 2>$null
 Write-Host ""
 Write-Host "Done. Site: https://lapmarket.vercel.app"
-Write-Host "Repo:" (& $Gh repo view $repoName --json url -q .url)
+if ($repoUrl) { Write-Host "Repo: $repoUrl" }

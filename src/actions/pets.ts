@@ -1,0 +1,134 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { requireSessionUser } from "@/lib/session";
+import { uploadImage } from "@/actions/media";
+import type { AnimalKind, PetSex } from "@prisma/client";
+
+export type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
+
+type PetFormData = {
+  name: string;
+  kind: AnimalKind;
+  breed?: string;
+  sex?: PetSex;
+  birthDate?: Date;
+  weightKg?: number;
+  microchip?: string;
+  notes?: string;
+};
+
+function parsePetForm(
+  formData: FormData
+): { ok: true; data: PetFormData } | { ok: false; error: string } {
+  const name = (formData.get("name") as string)?.trim();
+  const kind = (formData.get("kind") as AnimalKind) || "OTHER";
+  const breed = (formData.get("breed") as string)?.trim() || undefined;
+  const sex = (formData.get("sex") as PetSex) || undefined;
+  const birthDateRaw = formData.get("birthDate") as string;
+  const birthDate = birthDateRaw ? new Date(birthDateRaw) : undefined;
+  const weightRaw = formData.get("weightKg") as string;
+  const weightKg = weightRaw ? parseFloat(weightRaw) : undefined;
+  const microchip = (formData.get("microchip") as string)?.trim() || undefined;
+  const notes = (formData.get("notes") as string)?.trim() || undefined;
+
+  if (!name) return { ok: false, error: "Укажите имя питомца" };
+  return {
+    ok: true,
+    data: { name, kind, breed, sex, birthDate, weightKg, microchip, notes },
+  };
+}
+
+export async function createPet(formData: FormData): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const parsed = parsePetForm(formData);
+    if (!parsed.ok) return { ok: false, error: parsed.error };
+
+    let avatarMediaId: string | undefined;
+    const file = formData.get("file");
+    if (file instanceof File && file.size > 0) {
+      const uploadForm = new FormData();
+      uploadForm.set("file", file);
+      const result = await uploadImage(uploadForm, "pets");
+      if (!result.ok) return { ok: false, error: result.error };
+      avatarMediaId = result.mediaId;
+    }
+
+    const pet = await prisma.pet.create({
+      data: { userId: user.id, ...parsed.data, avatarMediaId },
+    });
+
+    revalidatePath("/pets");
+    revalidatePath("/profile");
+    return { ok: true, id: pet.id };
+  } catch {
+    return { ok: false, error: "Не удалось создать питомца" };
+  }
+}
+
+export async function updatePet(id: string, formData: FormData): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const existing = await prisma.pet.findFirst({ where: { id, userId: user.id } });
+    if (!existing) return { ok: false, error: "Питомец не найден" };
+
+    const parsed = parsePetForm(formData);
+    if (!parsed.ok) return { ok: false, error: parsed.error };
+
+    let avatarMediaId = existing.avatarMediaId;
+    const file = formData.get("file");
+    if (file instanceof File && file.size > 0) {
+      const uploadForm = new FormData();
+      uploadForm.set("file", file);
+      const result = await uploadImage(uploadForm, "pets");
+      if (!result.ok) return { ok: false, error: result.error };
+      avatarMediaId = result.mediaId;
+    }
+
+    await prisma.pet.update({
+      where: { id },
+      data: { ...parsed.data, avatarMediaId },
+    });
+
+    revalidatePath(`/pets/${id}`);
+    revalidatePath("/pets");
+    revalidatePath("/profile");
+    return { ok: true, id };
+  } catch {
+    return { ok: false, error: "Не удалось сохранить" };
+  }
+}
+
+export async function deletePet(id: string): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    await prisma.pet.deleteMany({ where: { id, userId: user.id } });
+    revalidatePath("/pets");
+    revalidatePath("/profile");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Не удалось удалить" };
+  }
+}
+
+export async function createPetShareToken(petId: string): Promise<
+  ActionResult & { token?: string }
+> {
+  try {
+    const user = await requireSessionUser();
+    const pet = await prisma.pet.findFirst({ where: { id: petId, userId: user.id } });
+    if (!pet) return { ok: false, error: "Питомец не найден" };
+
+    const share = await prisma.petShareToken.create({
+      data: {
+        petId,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+    });
+    return { ok: true, token: share.token };
+  } catch {
+    return { ok: false, error: "Ошибка" };
+  }
+}

@@ -1,0 +1,94 @@
+import NextAuth from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import Credentials from "next-auth/providers/credentials";
+import { prisma } from "@/lib/prisma";
+import { verifyPassword } from "@/lib/password";
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: "jwt" },
+  pages: {
+    signIn: "/login",
+  },
+  providers: [
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = credentials?.email as string | undefined;
+        const password = credentials?.password as string | undefined;
+
+        if (!email || !password) {
+          return null;
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email: email.toLowerCase().trim() },
+        });
+
+        if (!user?.passwordHash) {
+          return null;
+        }
+
+        const valid = await verifyPassword(password, user.passwordHash);
+        if (!valid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          email: user.email!,
+          name: user.displayName,
+          image: user.avatar,
+          role: user.role,
+          displayName: user.displayName,
+          avatar: user.avatar,
+          city: user.city,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user, trigger, session }) {
+      if (user) {
+        token.id = user.id!;
+        token.role = user.role;
+        token.displayName = user.displayName;
+        token.avatar = user.avatar;
+        token.city = user.city;
+      }
+      if (trigger === "update" && session?.user) {
+        if (session.user.avatar) token.avatar = session.user.avatar;
+        if (session.user.displayName) token.displayName = session.user.displayName;
+        if (session.user.city !== undefined) token.city = session.user.city;
+      }
+      if (trigger === "update" && token.id && !session?.user?.avatar) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+        });
+        if (dbUser) {
+          token.avatar = dbUser.avatar;
+          token.displayName = dbUser.displayName;
+          token.city = dbUser.city;
+        }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.displayName = token.displayName;
+        session.user.avatar = token.avatar;
+        session.user.city = token.city;
+        session.user.name = token.displayName;
+        session.user.image = token.avatar;
+      }
+      return session;
+    },
+  },
+});

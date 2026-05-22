@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: lapmarket
+      POSTGRES_PASSWORD: lapmarket
+      POSTGRES_DB: lapmarket
+    volumes:
+      - lapmarket_pg:/var/lib/postgresql/data
+
+volumes:
+  lapmarket_pg:

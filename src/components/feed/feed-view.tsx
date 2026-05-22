@@ -1,65 +1,86 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ImagePlus, Send } from "lucide-react";
-import { feedPosts } from "@/lib/mock-data";
+import { ImagePlus } from "lucide-react";
+import { toast } from "sonner";
 import { PostCard } from "./post-card";
 import { Modal } from "@/components/ui/modal";
 import { StaggerGrid, StaggerItem } from "@/components/ui/stagger-grid";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { createPost } from "@/actions/posts";
+import type { FeedPostData } from "@/lib/queries/posts";
 
-export function FeedView() {
+export function FeedView({
+  posts,
+  currentUserId,
+  pets = [],
+}: {
+  posts: FeedPostData[];
+  currentUserId?: string;
+  pets?: { id: string; name: string }[];
+}) {
+  const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
-  const [caption, setCaption] = useState("");
-  const [preview, setPreview] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setPreview(URL.createObjectURL(file));
-  };
-
-  const publish = () => {
-    alert(
-      preview || caption
-        ? "Пост опубликован (демо). В продакшене — загрузка на сервер."
-        : "Добавьте фото или текст поста."
-    );
-    setCreateOpen(false);
-    setCaption("");
-    setPreview(null);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    startTransition(async () => {
+      const result = await createPost(formData);
+      if (result.ok) {
+        toast.success("Пост опубликован");
+        setCreateOpen(false);
+        form.reset();
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    });
   };
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className="text-3xl font-bold tracking-tight text-stone-900">
-          Лента
-        </h1>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-3xl font-bold tracking-tight text-stone-900">Лента</h1>
         <p className="mt-2 text-stone-600">
           Соцсеть владельцев ЛапМаркет — посты, лайки и забота о питомцах
         </p>
       </motion.div>
 
-      <motion.button
-        type="button"
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
-        onClick={() => setCreateOpen(true)}
-        className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-emerald-300/80 bg-emerald-50/50 py-4 text-sm font-semibold text-emerald-800 transition hover:border-emerald-400 hover:bg-emerald-50"
-      >
-        <ImagePlus className="h-5 w-5" />
-        Создать пост
-      </motion.button>
+      {currentUserId ? (
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          onClick={() => setCreateOpen(true)}
+          className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-emerald-300/80 bg-emerald-50/50 py-4 text-sm font-semibold text-emerald-800 transition hover:border-emerald-400 hover:bg-emerald-50"
+        >
+          <ImagePlus className="h-5 w-5" />
+          Создать пост
+        </motion.button>
+      ) : (
+        <p className="mt-8 rounded-2xl bg-stone-50 px-4 py-3 text-center text-sm text-stone-600">
+          <a href="/login" className="font-semibold text-emerald-700 hover:underline">
+            Войдите
+          </a>
+          , чтобы публиковать посты
+        </p>
+      )}
 
       <StaggerGrid className="mt-8 flex flex-col gap-5">
-        {feedPosts.map((post) => (
-          <StaggerItem key={post.id}>
-            <PostCard post={post} />
-          </StaggerItem>
-        ))}
+        {posts.length === 0 ? (
+          <p className="text-center text-stone-500">Пока нет постов. Будьте первым!</p>
+        ) : (
+          posts.map((post) => (
+            <StaggerItem key={post.id}>
+              <PostCard post={post} currentUserId={currentUserId} />
+            </StaggerItem>
+          ))
+        )}
       </StaggerGrid>
 
       <Modal
@@ -68,39 +89,58 @@ export function FeedView() {
         title="Новый пост"
         size="md"
       >
-        <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50 py-10 transition hover:border-emerald-300 hover:bg-emerald-50/30">
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFile}
-          />
-          {preview ? (
-            <span className="text-6xl">🖼️</span>
-          ) : (
-            <>
-              <ImagePlus className="h-10 w-10 text-emerald-600" />
-              <span className="mt-2 text-sm font-medium text-stone-600">
-                Загрузить фото питомца
-              </span>
-            </>
-          )}
-        </label>
-        <textarea
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          placeholder="Расскажите о своём питомце..."
-          rows={4}
-          className="mt-4 w-full resize-none rounded-2xl border border-stone-200 px-4 py-3 text-sm outline-none ring-emerald-500/0 transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
-        />
-        <button
-          type="button"
-          onClick={publish}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-600"
-        >
-          <Send className="h-4 w-4" />
-          Опубликовать
-        </button>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <ImageUpload name="file" label="Добавить фото" />
+          <div>
+            <label className="text-sm font-medium text-stone-700">Питомец</label>
+            {pets.length > 0 ? (
+              <select
+                name="petId"
+                className="mt-1 w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
+              >
+                <option value="">Без привязки</option>
+                {pets.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                name="petName"
+                type="text"
+                placeholder="Имя питомца"
+                className="mt-1 w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
+              />
+            )}
+          </div>
+          <div>
+            <label className="text-sm font-medium text-stone-700">Текст</label>
+            <textarea
+              name="content"
+              required
+              rows={4}
+              placeholder="Чем хотите поделиться?"
+              className="mt-1 w-full resize-none rounded-xl border border-stone-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-400"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-stone-700">Теги</label>
+            <input
+              name="tags"
+              type="text"
+              placeholder="корм, собака (через запятую)"
+              className="mt-1 w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-400"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={pending}
+            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+          >
+            {pending ? "Публикация..." : "Опубликовать"}
+          </button>
+        </form>
       </Modal>
     </div>
   );

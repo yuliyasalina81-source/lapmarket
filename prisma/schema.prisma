@@ -1,0 +1,564 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  SELLER
+  SHELTER
+  ADMIN
+}
+
+enum SellerTier {
+  PENDING
+  CERTIFIED
+}
+
+enum ProductCategory {
+  FOOD
+  TOYS
+  BEDS
+  PHARMACY
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AnimalKind {
+  DOG
+  CAT
+  BIRD
+  RODENT
+  OTHER
+}
+
+enum AnimalBadge {
+  PEDIGREE
+  GOOD_HANDS
+}
+
+enum ListingStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
+enum ServiceKind {
+  VETERINARY
+  GROOMING
+  TRAINING
+  BOARDING
+  OTHER
+}
+
+enum BookingStatus {
+  NEW
+  CONFIRMED
+  CANCELLED
+}
+
+enum ContactRequestStatus {
+  NEW
+  READ
+  CLOSED
+}
+
+enum CertificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PetSex {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum ReminderType {
+  VACCINATION
+  DEWORMING
+  GROOMING
+  VET_VISIT
+  MEDICATION
+  CUSTOM
+}
+
+enum ReminderStatus {
+  PENDING
+  DONE
+  SKIPPED
+}
+
+enum NotificationType {
+  CONTACT_REQUEST
+  BOOKING_UPDATE
+  REMINDER
+  ORDER_REQUEST
+  SYSTEM
+}
+
+enum OrderRequestStatus {
+  NEW
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          UserRole  @default(OWNER)
+  displayName   String
+  avatar        String    @default("🐾")
+  city          String?
+  onboardingDone Boolean  @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts            Account[]
+  sessions            Session[]
+  pets                Pet[]
+  sellerProfile       SellerProfile?
+  shelterProfile      ShelterProfile?
+  mediaAssets         MediaAsset[]
+  products            Product[]
+  animalListings      AnimalListing[]
+  posts               Post[]
+  postLikes           PostLike[]
+  comments            Comment[]
+  contactRequestsSent ContactRequest[] @relation("ContactFrom")
+  serviceBookings     ServiceBooking[] @relation("BookingUser")
+  serviceProviders    ServiceProvider[]
+  notifications       Notification[]
+  orderRequests       OrderRequest[]   @relation("OrderBuyer")
+  orderRequestsSeller OrderRequest[]   @relation("OrderSeller")
+  productReviews      ProductReview[]
+  serviceReviews      ServiceReview[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String           @db.Text
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+model Pet {
+  id            String     @id @default(cuid())
+  userId        String
+  name          String
+  kind          AnimalKind @default(OTHER)
+  breed         String?
+  sex           PetSex?
+  birthDate     DateTime?
+  weightKg      Float?
+  microchip     String?
+  avatarMediaId String?
+  notes         String?    @db.Text
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  avatarMedia    MediaAsset?       @relation("PetAvatar", fields: [avatarMediaId], references: [id], onDelete: SetNull)
+  vaccinations   Vaccination[]
+  medicalRecords MedicalRecord[]
+  reminders      Reminder[]
+  weightLogs     WeightLog[]
+  bookings       ServiceBooking[]
+  posts          Post[]
+  shareTokens    PetShareToken[]
+
+  @@index([userId])
+}
+
+model PetShareToken {
+  id        String   @id @default(cuid())
+  petId     String
+  token     String   @unique @default(cuid())
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+}
+
+model Vaccination {
+  id        String    @id @default(cuid())
+  petId     String
+  name      String
+  date      DateTime
+  nextDueAt DateTime?
+  clinic    String?
+  notes     String?   @db.Text
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+}
+
+model MedicalRecord {
+  id                  String   @id @default(cuid())
+  petId               String
+  date                DateTime
+  title               String
+  diagnosis           String?  @db.Text
+  treatment           String?  @db.Text
+  providerName        String?
+  attachmentMediaId   String?
+  createdAt           DateTime @default(now())
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+}
+
+model Reminder {
+  id         String         @id @default(cuid())
+  petId      String
+  type       ReminderType
+  title      String
+  dueAt      DateTime
+  status     ReminderStatus @default(PENDING)
+  repeatDays Int?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId, status, dueAt])
+}
+
+model WeightLog {
+  id     String   @id @default(cuid())
+  petId  String
+  kg     Float
+  date   DateTime @default(now())
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+}
+
+model SellerProfile {
+  id          String     @id @default(cuid())
+  userId      String     @unique
+  shopName    String
+  description String
+  tier        SellerTier @default(PENDING)
+  verifiedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certificationRequests SellerCertificationRequest[]
+}
+
+model ShelterProfile {
+  id               String @id @default(cuid())
+  userId           String @unique
+  organizationName String
+  description      String
+  city             String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  pathname  String
+  mimeType  String
+  size      Int
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productImages       ProductImage[]
+  animalListingImages AnimalListingImage[]
+  posts               Post[]
+  serviceProviders    ServiceProvider[]
+  petAvatars          Pet[]                @relation("PetAvatar")
+}
+
+model Product {
+  id          String          @id @default(cuid())
+  sellerId    String
+  title       String
+  description String          @db.Text
+  price       Int
+  category    ProductCategory
+  status      ProductStatus   @default(DRAFT)
+  rating      Float           @default(0)
+  reviewCount Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  seller            User              @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  images            ProductImage[]
+  orderRequestItems OrderRequestItem[]
+  reviews           ProductReview[]
+}
+
+model ProductImage {
+  id        String @id @default(cuid())
+  productId String
+  mediaId   String
+  sortOrder Int    @default(0)
+
+  product Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  media   MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, mediaId])
+}
+
+model ProductReview {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int
+  text      String?  @db.Text
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+}
+
+model OrderRequest {
+  id        String             @id @default(cuid())
+  buyerId   String
+  sellerId  String
+  status    OrderRequestStatus @default(NEW)
+  message   String?            @db.Text
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  buyer  User               @relation("OrderBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller User               @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  items  OrderRequestItem[]
+
+  @@index([sellerId, status])
+  @@index([buyerId])
+}
+
+model OrderRequestItem {
+  id             String @id @default(cuid())
+  orderRequestId String
+  productId      String
+  quantity       Int    @default(1)
+  priceAtOrder   Int
+
+  orderRequest OrderRequest @relation(fields: [orderRequestId], references: [id], onDelete: Cascade)
+  product      Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model AnimalListing {
+  id          String        @id @default(cuid())
+  authorId    String
+  name        String
+  kind        AnimalKind
+  breed       String?
+  age         String
+  city        String
+  price       Int?
+  badges      AnimalBadge[]
+  description String        @db.Text
+  status      ListingStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  author          User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  images          AnimalListingImage[]
+  contactRequests ContactRequest[]
+}
+
+model AnimalListingImage {
+  id        String @id @default(cuid())
+  listingId String
+  mediaId   String
+  sortOrder Int    @default(0)
+
+  listing AnimalListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  media   MediaAsset    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, mediaId])
+}
+
+model ContactRequest {
+  id         String               @id @default(cuid())
+  listingId  String
+  fromUserId String
+  message    String               @db.Text
+  status     ContactRequestStatus @default(NEW)
+  createdAt  DateTime             @default(now())
+
+  listing  AnimalListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  fromUser User          @relation("ContactFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, status])
+}
+
+model ServiceProvider {
+  id          String      @id @default(cuid())
+  userId      String
+  name        String
+  kind        ServiceKind
+  city        String
+  address     String
+  rating      Float       @default(0)
+  reviewCount Int         @default(0)
+  priceFrom   Int
+  specialties String[]
+  verified    Boolean     @default(false)
+  mediaId     String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media    MediaAsset?       @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  bookings ServiceBooking[]
+  reviews  ServiceReview[]
+}
+
+model ServiceBooking {
+  id          String        @id @default(cuid())
+  providerId  String
+  userId      String
+  petId       String?
+  scheduledAt DateTime
+  note        String?       @db.Text
+  status      BookingStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  provider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  user     User            @relation("BookingUser", fields: [userId], references: [id], onDelete: Cascade)
+  pet      Pet?            @relation(fields: [petId], references: [id], onDelete: SetNull)
+  review   ServiceReview?
+
+  @@index([userId])
+  @@index([providerId])
+}
+
+model ServiceReview {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  userId    String
+  providerId String
+  rating    Int
+  text      String?  @db.Text
+  createdAt DateTime @default(now())
+
+  booking  ServiceBooking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  authorId  String
+  content   String   @db.Text
+  petName   String?
+  petId     String?
+  tags      String[]
+  mediaId   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  pet    Pet?        @relation(fields: [petId], references: [id], onDelete: SetNull)
+  media  MediaAsset? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  likes  PostLike[]
+  comments Comment[]
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model SellerCertificationRequest {
+  id              String              @id @default(cuid())
+  sellerProfileId String
+  status          CertificationStatus @default(PENDING)
+  note            String?             @db.Text
+  adminNote       String?             @db.Text
+  createdAt       DateTime            @default(now())
+  resolvedAt      DateTime?
+
+  sellerProfile SellerProfile @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+}

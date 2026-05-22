@@ -4,6 +4,7 @@ import {
   PawPrint,
   ShoppingBag,
   Stethoscope,
+  Syringe,
   type LucideIcon,
 } from "lucide-react";
 
@@ -15,9 +16,9 @@ export type NavItem = {
 
 /** Основные разделы (без главной — она в логотипе на десктопе). */
 export const appNav: NavItem[] = [
+  { href: "/pets", label: "Паспорт", icon: Syringe },
   { href: "/feed", label: "Лента", icon: Newspaper },
   { href: "/market", label: "Маркет", icon: ShoppingBag },
-  { href: "/animals", label: "Питомцы", icon: PawPrint },
   { href: "/services", label: "Услуги", icon: Stethoscope },
 ];
 

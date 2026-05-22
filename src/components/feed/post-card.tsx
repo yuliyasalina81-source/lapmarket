@@ -1,67 +1,120 @@
 "use client";
 
-import type { FeedPost } from "@/types";
-import { Heart, MessageCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Heart, MessageCircle, Send } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
+import { AvatarDisplay } from "@/components/ui/avatar-display";
+import { ProductImage } from "@/components/ui/product-image";
+import { togglePostLike, addComment } from "@/actions/posts";
+import type { FeedPostData } from "@/lib/queries/posts";
 
-function formatDate(iso: string): string {
+function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("ru-RU", {
     day: "numeric",
     month: "short",
-  }).format(new Date(iso));
+  }).format(date);
 }
 
-export function PostCard({ post }: { post: FeedPost }) {
-  const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(post.likes);
+export function PostCard({
+  post,
+  currentUserId,
+}: {
+  post: FeedPostData;
+  currentUserId?: string;
+}) {
+  const [liked, setLiked] = useState(
+    currentUserId ? post.likes.some((l) => l.userId === currentUserId) : false
+  );
+  const [likeCount, setLikeCount] = useState(post._count.likes);
+  const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const [pop, setPop] = useState(false);
 
   const toggleLike = () => {
-    setLiked((prev) => {
-      const next = !prev;
-      setLikes((c) => (next ? c + 1 : c - 1));
-      if (next) {
-        setPop(true);
-        setTimeout(() => setPop(false), 350);
+    if (!currentUserId) {
+      toast.error("Войдите, чтобы ставить лайки");
+      return;
+    }
+    const next = !liked;
+    setLiked(next);
+    setLikeCount((c) => (next ? c + 1 : c - 1));
+    if (next) {
+      setPop(true);
+      setTimeout(() => setPop(false), 350);
+    }
+    startTransition(async () => {
+      const result = await togglePostLike(post.id);
+      if (!result.ok) {
+        setLiked(!next);
+        setLikeCount((c) => (next ? c - 1 : c + 1));
+        toast.error(result.error);
       }
-      return next;
+    });
+  };
+
+  const submitComment = () => {
+    if (!currentUserId) {
+      toast.error("Войдите, чтобы комментировать");
+      return;
+    }
+    startTransition(async () => {
+      const result = await addComment(post.id, commentText);
+      if (result.ok) {
+        setCommentText("");
+        toast.success("Комментарий добавлен");
+        setShowComments(true);
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
     });
   };
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-white/80 bg-white/90 p-5 shadow-sm shadow-stone-900/5 transition hover:shadow-lg hover:shadow-emerald-900/5">
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 text-xl ring-2 ring-white">
-          {post.authorAvatar}
-        </span>
+        <AvatarDisplay
+          avatar={post.author.avatar}
+          name={post.author.displayName}
+          size={44}
+        />
         <div>
-          <p className="font-semibold text-stone-900">{post.authorName}</p>
+          <p className="font-semibold text-stone-900">{post.author.displayName}</p>
           <p className="text-xs text-stone-500">
-            питомец: {post.petName} · {formatDate(post.createdAt)}
+            {(post.pet?.name ?? post.petName)
+              ? `питомец: ${post.pet?.name ?? post.petName} · `
+              : ""}
+            {formatDate(post.createdAt)}
           </p>
         </div>
       </div>
       <p className="mt-4 leading-relaxed text-stone-700">{post.content}</p>
-      {post.image && (
-        <div className="mt-4 flex h-44 items-center justify-center rounded-2xl bg-gradient-to-br from-stone-50 to-emerald-50/50 text-5xl transition group-hover:scale-[1.01]">
-          {post.image}
+      {post.media?.url && (
+        <div className="relative mt-4 h-64 overflow-hidden rounded-2xl">
+          <ProductImage src={post.media.url} alt="" fill className="rounded-2xl" />
         </div>
       )}
-      <div className="mt-3 flex flex-wrap gap-2">
-        {post.tags.map((tag) => (
-          <span
-            key={tag}
-            className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
-          >
-            #{tag}
-          </span>
-        ))}
-      </div>
+      {post.tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {post.tags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="mt-4 flex gap-5 border-t border-stone-100 pt-4 text-sm">
         <button
           type="button"
           onClick={toggleLike}
+          disabled={pending}
           className={`flex items-center gap-1.5 font-medium transition ${
             liked ? "text-red-500" : "text-stone-500 hover:text-red-500"
           }`}
@@ -72,16 +125,56 @@ export function PostCard({ post }: { post: FeedPost }) {
               aria-hidden
             />
           </motion.span>
-          {likes}
+          {likeCount}
         </button>
         <button
           type="button"
+          onClick={() => setShowComments(!showComments)}
           className="flex items-center gap-1.5 font-medium text-stone-500 transition hover:text-emerald-700"
         >
           <MessageCircle className="h-5 w-5" aria-hidden />
-          {post.comments}
+          {post._count.comments}
         </button>
       </div>
+
+      {showComments && (
+        <div className="mt-4 space-y-3 border-t border-stone-100 pt-4">
+          {post.comments.map((c) => (
+            <div key={c.id} className="flex gap-2">
+              <AvatarDisplay
+                avatar={c.author.avatar}
+                name={c.author.displayName}
+                size={32}
+              />
+              <div>
+                <p className="text-xs font-semibold text-stone-800">
+                  {c.author.displayName}
+                </p>
+                <p className="text-sm text-stone-600">{c.content}</p>
+              </div>
+            </div>
+          ))}
+          {currentUserId && (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Написать комментарий..."
+                className="flex-1 rounded-xl border border-stone-200 px-3 py-2 text-sm outline-none focus:border-emerald-400"
+              />
+              <button
+                type="button"
+                onClick={submitComment}
+                disabled={pending}
+                className="rounded-xl bg-emerald-600 p-2 text-white hover:bg-emerald-700 disabled:opacity-50"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </article>
   );
 }

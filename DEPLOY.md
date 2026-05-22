@@ -8,20 +8,30 @@
 
 ## GitHub + автодеплой (один раз)
 
-В PowerShell из корня проекта:
+### Автоматически
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/setup-github.ps1
 ```
 
-Скрипт:
+### Если ошибка SSL / «certificate is valid for dns.google»
 
-1. Войдёт в GitHub через браузер (если ещё не вошли)
-2. Создаст публичный репозиторий `lapmarket`
-3. Зальёт код
-4. Привяжет репозиторий к проекту Vercel
+На ПК часто мешает AdGuard, антивирус или DNS-фильтр. Временно отключите их или смените DNS на `8.8.8.8`, затем снова запустите скрипт.
 
-Ручная альтернатива: [vercel.com](https://vercel.com) → проект **lapmarket** → Settings → Git → Connect Repository.
+**Или вручную (5 минут):**
+
+1. Откройте https://github.com/new → имя `lapmarket` → Create repository (без README).
+2. В PowerShell в папке проекта (подставьте свой логин GitHub):
+
+```powershell
+git remote add origin https://github.com/ВАШ_ЛОГИН/lapmarket.git
+git branch -M main
+git push -u origin main
+```
+
+3. https://vercel.com → проект **lapmarket** → **Settings** → **Git** → **Connect Git Repository** → выберите `lapmarket`.
+
+После этого каждый `git push` будет автоматически обновлять сайт.
 
 ## Свой домен (например lapmarket.ru)
 
@@ -38,9 +48,37 @@ powershell -ExecutionPolicy Bypass -File scripts/setup-github.ps1
 
 Проверка: `npx vercel domains inspect lapmarket.ru`
 
+## Переменные окружения (Vercel)
+
+В **Settings → Environment Variables** добавьте:
+
+| Переменная | Описание |
+|------------|----------|
+| `DATABASE_URL` | PostgreSQL (Neon, Vercel Postgres и т.п.) |
+| `AUTH_SECRET` | Секрет сессии (`openssl rand -base64 32`) |
+| `AUTH_URL` | URL production, напр. `https://lapmarket.vercel.app` |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Dashboard → **Storage** → **Blob** → Create → скопировать токен |
+| `RESEND_API_KEY` | Resend.com — письма сброса пароля |
+| `EMAIL_FROM` | Отправитель, напр. `LapMarket <onboarding@resend.dev>` |
+| `CRON_SECRET` | Секрет для `GET /api/cron/reminders` (заголовок `Authorization: Bearer …`) |
+
+Без `BLOB_READ_WRITE_TOKEN` загрузка фото (посты, товары, объявления, аватар) не будет работать.
+
+После первого подключения БД выполните миграции (локально или в CI):
+
+```bash
+npm run db:migrate:deploy
+```
+
+Опционально seed для демо-данных: `npm run db:seed` (только dev/staging).
+
 ## Локальная разработка
 
 ```bash
+cp .env.example .env
+# заполните DATABASE_URL, AUTH_SECRET, AUTH_URL, BLOB_READ_WRITE_TOKEN
+npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 

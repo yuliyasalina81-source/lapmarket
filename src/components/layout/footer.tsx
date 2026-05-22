@@ -12,13 +12,18 @@ export function Footer() {
               Лап<span className="text-emerald-600">Маркет</span>
             </p>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-stone-600">
-              Премиум-соцсеть и маркетплейс для владельцев домашних животных.
-              Товары — только от сертифицированных продавцов.
+              Цифровой паспорт питомца, маркет от сертифицированных продавцов,
+              объявления и запись к ветеринару.
             </p>
           </div>
           <div>
             <p className="text-sm font-semibold text-stone-800">Разделы</p>
             <ul className="mt-3 space-y-2 text-sm text-stone-600">
+              <li>
+                <Link href="/pets" className="hover:text-emerald-600">
+                  Паспорт питомца
+                </Link>
+              </li>
               <li>
                 <Link href="/feed" className="hover:text-emerald-600">
                   Лента
@@ -61,7 +66,10 @@ export function Footer() {
           </div>
         </div>
         <p className="mt-10 text-center text-xs text-stone-400">
-          © {new Date().getFullYear()} ЛапМаркет
+          © {new Date().getFullYear()} ЛапМаркет ·{" "}
+          <Link href="/privacy" className="hover:text-emerald-600">
+            Конфиденциальность
+          </Link>
         </p>
       </div>
     </footer>

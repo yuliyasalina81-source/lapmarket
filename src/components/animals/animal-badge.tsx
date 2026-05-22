@@ -1,23 +1,23 @@
 import { BadgeCheck, Heart, FileText } from "lucide-react";
-import type { AnimalBadge as BadgeType } from "@/types";
+import type { AnimalBadge as BadgeEnum } from "@prisma/client";
 
 const config: Record<
-  BadgeType,
+  BadgeEnum,
   { label: string; icon: typeof BadgeCheck; className: string }
 > = {
-  pedigree: {
+  PEDIGREE: {
     label: "С галочкой",
     icon: BadgeCheck,
     className: "bg-emerald-50 text-emerald-700 border-emerald-200",
   },
-  goodHands: {
+  GOOD_HANDS: {
     label: "С сердечком",
     icon: Heart,
     className: "bg-red-50 text-red-600 border-red-200",
   },
 };
 
-export function AnimalBadge({ type }: { type: BadgeType }) {
+export function AnimalBadge({ type }: { type: BadgeEnum }) {
   const { label, icon: Icon, className } = config[type];
   return (
     <span

@@ -1,0 +1,17 @@
+{
+  "name": "ЛапМаркет",
+  "short_name": "ЛапМаркет",
+  "description": "Паспорт питомца, маркет и услуги для владельцев",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ecfdf5",
+  "theme_color": "#059669",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
