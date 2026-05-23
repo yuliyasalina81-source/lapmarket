@@ -15,16 +15,32 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-24 text-center">
-      <h1 className="text-2xl font-bold text-stone-900">Что-то пошло не так</h1>
-      <p className="mt-2 text-stone-600">
-        Попробуйте обновить страницу или вернитесь позже.
+    <div className="mx-auto max-w-lg px-4 py-16 text-center sm:py-24">
+      <h1 className="text-xl font-bold text-stone-900 sm:text-2xl">
+        Что-то пошло не так
+      </h1>
+      <p className="mt-2 text-sm text-stone-600 sm:text-base">
+        Попробуйте обновить страницу. На телефоне помогает открыть сайт в
+        обычном браузере (не из закладки «на экран») или очистить кэш.
       </p>
-      <div className="mt-8 flex justify-center gap-3">
+      <div className="mt-6 flex flex-col justify-center gap-2 sm:mt-8 sm:flex-row sm:gap-3">
         <Button type="button" onClick={() => reset()}>
           Повторить
         </Button>
-        <Button variant="secondary" type="button" onClick={() => (window.location.href = "/")}>
+        <Button
+          variant="secondary"
+          type="button"
+          onClick={() => window.location.reload()}
+        >
+          Обновить
+        </Button>
+        <Button
+          variant="secondary"
+          type="button"
+          onClick={() => {
+            window.location.href = "/";
+          }}
+        >
           На главную
         </Button>
       </div>

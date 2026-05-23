@@ -52,6 +52,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn() {
+      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      try {
+        if (new URL(url).origin === baseUrl) return url;
+      } catch {
+        /* ignore */
+      }
+      return `${baseUrl}/profile`;
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id!;

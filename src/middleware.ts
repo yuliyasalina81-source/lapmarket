@@ -22,6 +22,16 @@ export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
 
+  // Never run auth logic for static assets / SW (no User-Agent filtering)
+  if (
+    pathname === "/sw.js" ||
+    pathname === "/manifest.json" ||
+    pathname === "/offline.html" ||
+    pathname.startsWith("/_next/")
+  ) {
+    return NextResponse.next();
+  }
+
   const secret = getAuthSecret();
   if (!secret) {
     return NextResponse.next();
@@ -69,6 +79,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/profile",
     "/profile/:path*",
     "/settings",
     "/seller/:path*",

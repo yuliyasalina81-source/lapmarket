@@ -1,21 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { PawPrint, Loader2 } from "lucide-react";
-import { getSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
+import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { loginSchema } from "@/lib/validations/auth";
+
+type SignInResult = {
+  error?: string;
+  ok?: boolean;
+  status?: number;
+  url?: string | null;
+};
+
+function isSignInFailure(result: unknown): boolean {
+  if (result && typeof result === "object" && "error" in result) {
+    const { error, ok } = result as SignInResult;
+    if (error) return true;
+    if (ok === false) return true;
+    return false;
+  }
+
+  if (typeof result === "string") {
+    return (
+      result.includes("error=CredentialsSignin") ||
+      result.includes("error=credentials")
+    );
+  }
+
+  return false;
+}
 
 export function LoginForm() {
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered") === "1";
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/profile";
+  const redirectTo = resolvePostLoginPath();
 
   const [error, setError] = useState<string>();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>();
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    const authError = searchParams.get("error");
+    if (authError === "CredentialsSignin") {
+      setError("Неверный email или пароль");
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -43,17 +76,17 @@ export function LoginForm() {
         email: parsed.data.email.toLowerCase().trim(),
         password: parsed.data.password,
         redirect: false,
-        callbackUrl,
+        redirectTo,
       });
 
-      if (!result?.ok || result.error) {
+      if (isSignInFailure(result)) {
         setError("Неверный email или пароль");
         setPending(false);
         return;
       }
 
-      await getSession();
-      window.location.assign(callbackUrl);
+      // Full navigation so the session cookie is applied before middleware runs
+      window.location.replace(redirectTo);
     } catch {
       setError("Ошибка входа. Попробуйте снова.");
       setPending(false);

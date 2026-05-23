@@ -9,6 +9,7 @@ import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { SessionProvider } from "@/components/layout/session-provider";
 import { AppToaster } from "@/components/ui/toaster";
 import { InstallBanner } from "@/components/pwa/install-banner";
+import { MobileFallback } from "@/components/pwa/mobile-fallback";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import "./globals.css";
 
@@ -30,6 +31,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
   themeColor: "#059669",
 };
 
@@ -57,6 +62,7 @@ export default async function RootLayout({
             <MobileBottomNav />
             <AppToaster />
             <InstallBanner />
+            <MobileFallback />
             <ServiceWorkerRegister />
           </SessionProvider>
         </div>
