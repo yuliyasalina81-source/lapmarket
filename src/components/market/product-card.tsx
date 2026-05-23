@@ -5,6 +5,7 @@ import { formatPrice, formatRating } from "@/lib/format";
 import { PRODUCT_CATEGORY_LABELS } from "@/lib/constants";
 import { getProductMainImage } from "@/lib/queries/products";
 import { ProductImage } from "@/components/ui/product-image";
+import { AddToCartButton } from "./add-to-cart-button";
 import { ShieldCheck, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import type { getPublishedProducts } from "@/lib/queries/products";
@@ -46,12 +47,15 @@ export function ProductCard({ product }: { product: ProductItem }) {
           <span className="text-xl font-bold text-emerald-700">
             {formatPrice(product.price)}
           </span>
-          <Link
-            href={`/market/${product.id}`}
-            className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600"
-          >
-            Подробнее
-          </Link>
+          <div className="flex gap-2">
+            <AddToCartButton productId={product.id} />
+            <Link
+              href={`/market/${product.id}`}
+              className="rounded-xl bg-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600"
+            >
+              Подробнее
+            </Link>
+          </div>
         </div>
       </div>
     </motion.article>

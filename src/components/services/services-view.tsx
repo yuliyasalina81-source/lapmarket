@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { SERVICE_KIND_LABELS } from "@/lib/constants";
 import { ServiceCard } from "./service-card";
+import { ServicesMap } from "./services-map";
 import { Modal } from "@/components/ui/modal";
 import { createServiceBooking } from "@/actions/services";
 import type { ServiceProviderWithMedia } from "@/lib/queries/services";
@@ -12,14 +13,17 @@ import type { ServiceKind } from "@prisma/client";
 export function ServicesView({
   providers,
   isLoggedIn,
+  pets = [],
 }: {
   providers: ServiceProviderWithMedia[];
   isLoggedIn: boolean;
+  pets?: { id: string; name: string }[];
 }) {
   const [kindFilter, setKindFilter] = useState<ServiceKind | "ALL">("ALL");
   const [bookProvider, setBookProvider] = useState<ServiceProviderWithMedia | null>(null);
   const [scheduledAt, setScheduledAt] = useState("");
   const [note, setNote] = useState("");
+  const [petId, setPetId] = useState("");
   const [pending, startTransition] = useTransition();
 
   const filtered =
@@ -37,7 +41,8 @@ export function ServicesView({
       const result = await createServiceBooking(
         bookProvider.id,
         scheduledAt,
-        note
+        note,
+        petId || undefined
       );
       if (result.ok) {
         toast.success("Запись создана");
@@ -71,6 +76,8 @@ export function ServicesView({
         ))}
       </div>
 
+      <ServicesMap providers={filtered} />
+
       <div className="mt-8 flex flex-col gap-5">
         {filtered.length === 0 ? (
           <p className="text-center text-stone-500">Услуг в этой категории пока нет</p>
@@ -97,6 +104,23 @@ export function ServicesView({
         title={`Запись: ${bookProvider?.name ?? ""}`}
       >
         <div className="space-y-4">
+          {pets.length > 0 && (
+            <div>
+              <label className="text-sm font-medium text-stone-700">Питомец</label>
+              <select
+                value={petId}
+                onChange={(e) => setPetId(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
+              >
+                <option value="">Не выбран</option>
+                {pets.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="text-sm font-medium text-stone-700">Дата и время</label>
             <input

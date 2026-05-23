@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { getProductMainImage } from "@/lib/queries/products";
 import { ProductImage } from "@/components/ui/product-image";
 import { CertificationBanner } from "@/components/seller/certification-banner";
+import { DeleteProductButton } from "@/components/seller/delete-product-button";
 
 export const metadata = { title: "Мои товары — ЛапМаркет" };
 
@@ -52,12 +53,15 @@ export default async function SellerProductsPage() {
                 </p>
                 <p className="text-emerald-700 font-bold">{formatPrice(p.price)}</p>
               </div>
-              <Link
-                href={`/seller/products/${p.id}/edit`}
-                className="self-center text-sm text-emerald-700 hover:underline"
-              >
-                Изменить
-              </Link>
+              <div className="flex flex-col gap-1 self-center">
+                <Link
+                  href={`/seller/products/${p.id}/edit`}
+                  className="text-sm text-emerald-700 hover:underline"
+                >
+                  Изменить
+                </Link>
+                <DeleteProductButton productId={p.id} />
+              </div>
             </div>
           ))
         )}

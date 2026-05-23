@@ -3,6 +3,10 @@ import type { ReminderStatus } from "@prisma/client";
 
 const petInclude = {
   avatarMedia: true,
+  gallery: {
+    orderBy: { sortOrder: "asc" as const },
+    include: { media: true },
+  },
   vaccinations: { orderBy: { date: "desc" as const } },
   medicalRecords: { orderBy: { date: "desc" as const } },
   reminders: {

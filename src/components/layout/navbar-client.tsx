@@ -55,8 +55,9 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
 
   const closeMenu = () => setMenuOpen(false);
 
-  const handleSignOut = () => {
-    signOut({ callbackUrl: "/" });
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    window.location.href = "/";
   };
 
   return (
@@ -112,13 +113,30 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
           >
             Поиск
           </Link>
-          {isLoggedIn && notifications && (
-            <div className="hidden sm:block">{notifications}</div>
-          )}
+          {isLoggedIn && notifications && <div>{notifications}</div>}
 
           {status === "loading" ? (
-            <div className="hidden h-10 w-24 animate-pulse rounded-2xl bg-stone-100 sm:block" />
+            <div className="h-10 w-10 animate-pulse rounded-2xl bg-stone-100 sm:w-24" />
           ) : isLoggedIn ? (
+            <>
+            <Link
+              href="/profile"
+              className="flex items-center sm:hidden"
+              aria-label="Профиль"
+            >
+              {isImageUrl(user.avatar ?? "") ? (
+                <AvatarDisplay
+                  avatar={user.avatar!}
+                  name={user.displayName ?? ""}
+                  size={36}
+                  className="rounded-xl"
+                />
+              ) : (
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-emerald-50 text-lg">
+                  {user.avatar}
+                </span>
+              )}
+            </Link>
             <div className="relative hidden sm:block" ref={dropdownRef}>
               <button
                 type="button"
@@ -181,6 +199,7 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
                 )}
               </AnimatePresence>
             </div>
+            </>
           ) : (
             <div className="hidden items-center gap-2 sm:flex">
               <Link

@@ -4,8 +4,24 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSessionUser } from "@/lib/session";
 import { isCertifiedSeller } from "@/lib/user";
-import { uploadImage } from "@/actions/media";
 import type { ProductCategory, ProductStatus } from "@prisma/client";
+
+async function resolveProductMediaIds(
+  formData: FormData,
+  userId: string
+): Promise<string[]> {
+  const raw = formData
+    .getAll("mediaIds")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  if (raw.length === 0) return [];
+  const owned = await prisma.mediaAsset.findMany({
+    where: { id: { in: raw }, userId },
+    select: { id: true },
+  });
+  const set = new Set(owned.map((m) => m.id));
+  return raw.filter((id) => set.has(id));
+}
 
 export type ActionResult =
   | { ok: true; id?: string }
@@ -45,18 +61,12 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
       },
     });
 
-    const files = formData.getAll("files");
+    const mediaIds = await resolveProductMediaIds(formData, user.id);
     let order = 0;
-    for (const file of files) {
-      if (!(file instanceof File) || file.size === 0) continue;
-      const uploadForm = new FormData();
-      uploadForm.set("file", file);
-      const result = await uploadImage(uploadForm, "products");
-      if (result.ok) {
-        await prisma.productImage.create({
-          data: { productId: product.id, mediaId: result.mediaId, sortOrder: order++ },
-        });
-      }
+    for (const mediaId of mediaIds) {
+      await prisma.productImage.create({
+        data: { productId: product.id, mediaId, sortOrder: order++ },
+      });
     }
 
     revalidatePath("/market");
@@ -89,19 +99,13 @@ export async function updateProduct(
       data: { title, description, price, category, status },
     });
 
-    const files = formData.getAll("files");
-    if (files.length > 0) {
+    const mediaIds = await resolveProductMediaIds(formData, user.id);
+    if (mediaIds.length > 0) {
       let order = await prisma.productImage.count({ where: { productId: id } });
-      for (const file of files) {
-        if (!(file instanceof File) || file.size === 0) continue;
-        const uploadForm = new FormData();
-        uploadForm.set("file", file);
-        const result = await uploadImage(uploadForm, "products");
-        if (result.ok) {
-          await prisma.productImage.create({
-            data: { productId: id, mediaId: result.mediaId, sortOrder: order++ },
-          });
-        }
+      for (const mediaId of mediaIds) {
+        await prisma.productImage.create({
+          data: { productId: id, mediaId, sortOrder: order++ },
+        });
       }
     }
 
@@ -111,6 +115,44 @@ export async function updateProduct(
     return { ok: true };
   } catch {
     return { ok: false, error: "Не удалось обновить товар" };
+  }
+}
+
+export async function deleteProduct(id: string): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const product = await prisma.product.findUnique({ where: { id } });
+    if (!product || product.sellerId !== user.id) {
+      return { ok: false, error: "Товар не найден" };
+    }
+    await prisma.product.update({
+      where: { id },
+      data: { status: "ARCHIVED" },
+    });
+    revalidatePath("/market");
+    revalidatePath("/seller/products");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Не удалось удалить товар" };
+  }
+}
+
+export async function removeProductImage(imageId: string): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const image = await prisma.productImage.findUnique({
+      where: { id: imageId },
+      include: { product: true },
+    });
+    if (!image || image.product.sellerId !== user.id) {
+      return { ok: false, error: "Изображение не найдено" };
+    }
+    await prisma.productImage.delete({ where: { id: imageId } });
+    revalidatePath(`/market/${image.productId}`);
+    revalidatePath("/seller/products");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Не удалось удалить фото" };
   }
 }
 

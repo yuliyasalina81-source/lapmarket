@@ -5,6 +5,7 @@ import { getUserBookings } from "@/lib/queries/services";
 import { SERVICE_KIND_LABELS } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
 import { BookingReviewForm } from "@/components/profile/booking-review-form";
+import { CancelBookingButton } from "@/components/profile/cancel-booking-button";
 
 export const metadata = { title: "Мои записи — ЛапМаркет" };
 
@@ -49,6 +50,7 @@ export default async function BookingsPage() {
                 от {formatPrice(b.provider.priceFrom)}
               </p>
               {b.note && <p className="mt-2 text-sm text-stone-500">{b.note}</p>}
+              {b.status === "NEW" && <CancelBookingButton bookingId={b.id} />}
               {b.status === "CONFIRMED" && !b.review && (
                 <BookingReviewForm bookingId={b.id} />
               )}

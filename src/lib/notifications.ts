@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { sendPushToUser } from "@/lib/push";
 import type { NotificationType } from "@prisma/client";
 
 export async function createNotification(params: {
@@ -8,7 +9,13 @@ export async function createNotification(params: {
   body: string;
   link?: string;
 }) {
-  return prisma.notification.create({ data: params });
+  const notification = await prisma.notification.create({ data: params });
+  void sendPushToUser(params.userId, {
+    title: params.title,
+    body: params.body,
+    url: params.link,
+  });
+  return notification;
 }
 
 export async function getUnreadCount(userId: string) {

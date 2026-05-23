@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ShieldCheck, Star } from "lucide-react";
-import { getProductById } from "@/lib/queries/products";
+import { getProductById, getProductReviews } from "@/lib/queries/products";
+import { ProductReviews } from "@/components/market/product-reviews";
 import { PRODUCT_CATEGORY_LABELS } from "@/lib/constants";
 import { formatPrice, formatRating } from "@/lib/format";
 import { ProductImage } from "@/components/ui/product-image";
@@ -23,7 +24,10 @@ export default async function ProductDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = await getProductById(id);
+  const [product, reviews] = await Promise.all([
+    getProductById(id),
+    getProductReviews(id),
+  ]);
   if (!product || product.status !== "PUBLISHED") notFound();
 
   const shop = product.seller.sellerProfile;
@@ -66,6 +70,11 @@ export default async function ProductDetailPage({
           <CartButton sellerId={product.sellerId} productId={product.id} />
         </div>
       </div>
+      <ProductReviews
+        reviews={reviews}
+        rating={product.rating}
+        reviewCount={product.reviewCount}
+      />
     </div>
   );
 }

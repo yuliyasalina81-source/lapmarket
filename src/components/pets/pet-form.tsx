@@ -29,11 +29,17 @@ export function PetForm({
     weightKg: number | null;
     microchip: string | null;
     notes: string | null;
+    avatarMedia?: { id: string; url: string } | null;
   };
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const isEdit = !!pet;
+
+  const defaultImages =
+    pet?.avatarMedia
+      ? [{ mediaId: pet.avatarMedia.id, url: pet.avatarMedia.url }]
+      : [];
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,7 +58,12 @@ export function PetForm({
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-xl space-y-4">
-      <ImageUpload name="file" label="Фото питомца" />
+      <ImageUpload
+        name="avatarMediaId"
+        folder="pets"
+        label="Фото питомца (аватар)"
+        defaultImages={defaultImages}
+      />
       <div>
         <label className="text-sm font-medium text-stone-700">Имя *</label>
         <input

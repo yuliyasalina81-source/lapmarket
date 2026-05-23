@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { updateProfile, updateAvatar } from "@/actions/settings";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
+import { PushSettings } from "@/components/pwa/push-settings";
 import type { UserRole } from "@prisma/client";
 
 export function SettingsForm({
@@ -96,6 +97,7 @@ export function SettingsForm({
           {pending ? "Сохранение..." : "Сохранить"}
         </button>
       </form>
+      <PushSettings />
     </div>
   );
 }

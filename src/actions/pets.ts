@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSessionUser } from "@/lib/session";
-import { uploadImage } from "@/actions/media";
 import type { AnimalKind, PetSex } from "@prisma/client";
 
 export type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
@@ -46,14 +45,14 @@ export async function createPet(formData: FormData): Promise<ActionResult> {
     const parsed = parsePetForm(formData);
     if (!parsed.ok) return { ok: false, error: parsed.error };
 
+    const avatarMediaIdRaw = (formData.get("avatarMediaId") as string)?.trim();
     let avatarMediaId: string | undefined;
-    const file = formData.get("file");
-    if (file instanceof File && file.size > 0) {
-      const uploadForm = new FormData();
-      uploadForm.set("file", file);
-      const result = await uploadImage(uploadForm, "pets");
-      if (!result.ok) return { ok: false, error: result.error };
-      avatarMediaId = result.mediaId;
+    if (avatarMediaIdRaw) {
+      const media = await prisma.mediaAsset.findFirst({
+        where: { id: avatarMediaIdRaw, userId: user.id },
+      });
+      if (!media) return { ok: false, error: "Фото не найдено" };
+      avatarMediaId = media.id;
     }
 
     const pet = await prisma.pet.create({
@@ -78,13 +77,13 @@ export async function updatePet(id: string, formData: FormData): Promise<ActionR
     if (!parsed.ok) return { ok: false, error: parsed.error };
 
     let avatarMediaId = existing.avatarMediaId;
-    const file = formData.get("file");
-    if (file instanceof File && file.size > 0) {
-      const uploadForm = new FormData();
-      uploadForm.set("file", file);
-      const result = await uploadImage(uploadForm, "pets");
-      if (!result.ok) return { ok: false, error: result.error };
-      avatarMediaId = result.mediaId;
+    const avatarMediaIdRaw = (formData.get("avatarMediaId") as string)?.trim();
+    if (avatarMediaIdRaw) {
+      const media = await prisma.mediaAsset.findFirst({
+        where: { id: avatarMediaIdRaw, userId: user.id },
+      });
+      if (!media) return { ok: false, error: "Фото не найдено" };
+      avatarMediaId = media.id;
     }
 
     await prisma.pet.update({

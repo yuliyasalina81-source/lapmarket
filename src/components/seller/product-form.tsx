@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createProduct, updateProduct } from "@/actions/products";
+import { ProductImageList } from "@/components/seller/product-image-list";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { PRODUCT_CATEGORY_LABELS, PRODUCT_CATEGORIES } from "@/lib/constants";
 import type { ProductCategory, ProductStatus } from "@prisma/client";
@@ -16,6 +17,7 @@ type ProductFormProps = {
     price: number;
     category: ProductCategory;
     status: ProductStatus;
+    images?: { id: string; media: { url: string } }[];
   };
 };
 
@@ -42,7 +44,14 @@ export function ProductForm({ product }: ProductFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-      <ImageUpload name="files" multiple maxFiles={5} label="Фото товара" />
+      {product?.images && <ProductImageList images={product.images} />}
+      <ImageUpload
+        name="mediaIds"
+        folder="products"
+        multiple
+        maxFiles={5}
+        label="Добавить фото"
+      />
       <Field label="Название" name="title" defaultValue={product?.title} required />
       <div>
         <label className="text-sm font-medium text-stone-700">Категория</label>

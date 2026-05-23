@@ -79,6 +79,12 @@ export async function updateBookingStatus(
       return { ok: false, error: "Недостаточно прав" };
     }
 
+    if (isCustomer && !isProvider) {
+      if (status !== "CANCELLED" || booking.status !== "NEW") {
+        return { ok: false, error: "Можно отменить только новую запись" };
+      }
+    }
+
     await prisma.serviceBooking.update({
       where: { id: bookingId },
       data: { status },
@@ -99,6 +105,10 @@ export async function updateBookingStatus(
   } catch {
     return { ok: false, error: "Ошибка" };
   }
+}
+
+export async function cancelBooking(bookingId: string): Promise<ActionResult> {
+  return updateBookingStatus(bookingId, "CANCELLED");
 }
 
 export async function createServiceReview(

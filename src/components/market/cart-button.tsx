@@ -3,26 +3,8 @@
 import { useState, useTransition } from "react";
 import { ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
-import { createOrderRequest, type CartItem } from "@/actions/orders";
-
-const CART_KEY = "lapmarket_cart";
-
-export function getCart(): CartItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(CART_KEY) ?? "[]");
-  } catch {
-    return [];
-  }
-}
-
-export function addToCart(productId: string) {
-  const cart = getCart();
-  const existing = cart.find((i) => i.productId === productId);
-  if (existing) existing.quantity += 1;
-  else cart.push({ productId, quantity: 1 });
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
-}
+import { addToCart, cartCount, CART_KEY, getCart } from "@/lib/cart";
+import { createOrderRequest } from "@/actions/orders";
 
 export function CartButton({
   sellerId,
@@ -36,7 +18,7 @@ export function CartButton({
 
   const add = () => {
     addToCart(productId);
-    setCount(getCart().reduce((s, i) => s + i.quantity, 0));
+    setCount(cartCount());
     toast.success("Добавлено в корзину");
   };
 

@@ -11,6 +11,7 @@ const nextConfig = {
         hostname: "images.unsplash.com",
       },
     ],
+    unoptimized: true,  // <- добавь эту строку
   },
 };
 

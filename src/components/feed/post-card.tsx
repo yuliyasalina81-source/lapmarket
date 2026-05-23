@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { useRouter } from "next/navigation";
-import { Heart, MessageCircle, Send } from "lucide-react";
+import { Heart, MessageCircle, Send, Pencil, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { ProductImage } from "@/components/ui/product-image";
-import { togglePostLike, addComment } from "@/actions/posts";
-import type { FeedPostData } from "@/lib/queries/posts";
+import { togglePostLike, addComment, deletePost, deleteComment } from "@/actions/posts";
+import { PostEditModal } from "./post-edit-modal";
+import { getPostImageUrls, type FeedPostData } from "@/lib/queries/posts";
 
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("ru-RU", {
@@ -20,9 +23,11 @@ function formatDate(date: Date): string {
 export function PostCard({
   post,
   currentUserId,
+  pets = [],
 }: {
   post: FeedPostData;
   currentUserId?: string;
+  pets?: { id: string; name: string }[];
 }) {
   const [liked, setLiked] = useState(
     currentUserId ? post.likes.some((l) => l.userId === currentUserId) : false
@@ -30,9 +35,14 @@ export function PostCard({
   const [likeCount, setLikeCount] = useState(post._count.likes);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [pop, setPop] = useState(false);
+
+  const imageUrls = getPostImageUrls(post);
+  const isAuthor = currentUserId === post.authorId;
 
   const toggleLike = () => {
     if (!currentUserId) {
@@ -74,16 +84,34 @@ export function PostCard({
     });
   };
 
+  const handleDelete = () => {
+    if (!confirm("Удалить пост?")) return;
+    startTransition(async () => {
+      const result = await deletePost(post.id);
+      if (result.ok) {
+        toast.success("Пост удалён");
+        router.refresh();
+      } else toast.error(result.error);
+    });
+  };
+
   return (
     <article className="group overflow-hidden rounded-2xl border border-white/80 bg-white/90 p-5 shadow-sm shadow-stone-900/5 transition hover:shadow-lg hover:shadow-emerald-900/5">
       <div className="flex items-center gap-3">
-        <AvatarDisplay
-          avatar={post.author.avatar}
-          name={post.author.displayName}
-          size={44}
-        />
-        <div>
-          <p className="font-semibold text-stone-900">{post.author.displayName}</p>
+        <Link href={`/users/${post.author.id}`}>
+          <AvatarDisplay
+            avatar={post.author.avatar}
+            name={post.author.displayName}
+            size={44}
+          />
+        </Link>
+        <div className="flex-1">
+          <Link
+            href={`/users/${post.author.id}`}
+            className="font-semibold text-stone-900 hover:text-emerald-700"
+          >
+            {post.author.displayName}
+          </Link>
           <p className="text-xs text-stone-500">
             {(post.pet?.name ?? post.petName)
               ? `питомец: ${post.pet?.name ?? post.petName} · `
@@ -91,12 +119,56 @@ export function PostCard({
             {formatDate(post.createdAt)}
           </p>
         </div>
+        {isAuthor && (
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setEditOpen(true)}
+              className="rounded-lg p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-700"
+              aria-label="Редактировать"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={pending}
+              className="rounded-lg p-2 text-stone-400 hover:bg-red-50 hover:text-red-600"
+              aria-label="Удалить"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
       <p className="mt-4 leading-relaxed text-stone-700">{post.content}</p>
-      {post.media?.url && (
-        <div className="relative mt-4 h-64 overflow-hidden rounded-2xl">
-          <ProductImage src={post.media.url} alt="" fill className="rounded-2xl" />
+      {imageUrls.length > 0 && (
+        <div
+          className={`mt-4 grid gap-2 ${
+            imageUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"
+          }`}
+        >
+          {imageUrls.map((url, i) => (
+            <button
+              key={url + i}
+              type="button"
+              onClick={() => setLightboxIndex(i)}
+              className={`relative overflow-hidden rounded-2xl ${
+                imageUrls.length === 1 ? "h-64" : "h-40"
+              }`}
+            >
+              <ProductImage src={url} alt="" fill className="rounded-2xl" />
+            </button>
+          ))}
         </div>
+      )}
+      {lightboxIndex !== null && imageUrls[lightboxIndex] && (
+        <ImageLightbox
+          src={imageUrls[lightboxIndex]}
+          alt="Фото в посте"
+          open
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
       {post.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
@@ -146,12 +218,27 @@ export function PostCard({
                 name={c.author.displayName}
                 size={32}
               />
-              <div>
+              <div className="flex-1">
                 <p className="text-xs font-semibold text-stone-800">
                   {c.author.displayName}
                 </p>
                 <p className="text-sm text-stone-600">{c.content}</p>
               </div>
+              {currentUserId === c.author.id && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    startTransition(async () => {
+                      const result = await deleteComment(c.id);
+                      if (result.ok) router.refresh();
+                      else toast.error(result.error);
+                    })
+                  }
+                  className="text-xs text-red-500 hover:underline"
+                >
+                  Удалить
+                </button>
+              )}
             </div>
           ))}
           {currentUserId && (
@@ -174,6 +261,15 @@ export function PostCard({
             </div>
           )}
         </div>
+      )}
+
+      {isAuthor && (
+        <PostEditModal
+          post={post}
+          pets={pets}
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+        />
       )}
     </article>
   );

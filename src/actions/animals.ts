@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSessionUser } from "@/lib/session";
-import { uploadImage } from "@/actions/media";
 import { createNotification } from "@/lib/notifications";
 import type { AnimalBadge, AnimalKind, ContactRequestStatus } from "@prisma/client";
 
@@ -45,16 +44,21 @@ export async function createListing(formData: FormData): Promise<ActionResult> {
       },
     });
 
-    const files = formData.getAll("files");
-    let order = 0;
-    for (const file of files) {
-      if (!(file instanceof File) || file.size === 0) continue;
-      const uploadForm = new FormData();
-      uploadForm.set("file", file);
-      const result = await uploadImage(uploadForm, "animals");
-      if (result.ok) {
+    const mediaIds = formData
+      .getAll("mediaIds")
+      .map((v) => String(v).trim())
+      .filter(Boolean);
+    if (mediaIds.length > 0) {
+      const owned = await prisma.mediaAsset.findMany({
+        where: { id: { in: mediaIds }, userId: user.id },
+        select: { id: true },
+      });
+      const set = new Set(owned.map((m) => m.id));
+      let order = 0;
+      for (const id of mediaIds) {
+        if (!set.has(id)) continue;
         await prisma.animalListingImage.create({
-          data: { listingId: listing.id, mediaId: result.mediaId, sortOrder: order++ },
+          data: { listingId: listing.id, mediaId: id, sortOrder: order++ },
         });
       }
     }

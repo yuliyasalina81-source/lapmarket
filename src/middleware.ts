@@ -14,13 +14,22 @@ const protectedPrefixes = [
 
 const sellerPrefixes = ["/seller"];
 
+function getAuthSecret(): string | undefined {
+  return process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+}
+
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
 
+  const secret = getAuthSecret();
+  if (!secret) {
+    return NextResponse.next();
+  }
+
   const token = await getToken({
     req,
-    secret: process.env.AUTH_SECRET,
+    secret,
   });
 
   const isLoggedIn = !!token;

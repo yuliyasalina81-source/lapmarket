@@ -11,7 +11,10 @@ export default async function EditProductPage({
   const session = await auth();
   if (!session?.user) redirect("/login");
   const { id } = await params;
-  const product = await prisma.product.findUnique({ where: { id } });
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: { images: { include: { media: true }, orderBy: { sortOrder: "asc" } } },
+  });
   if (!product || product.sellerId !== session.user.id) notFound();
 
   return (

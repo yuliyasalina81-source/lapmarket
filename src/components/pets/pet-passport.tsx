@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Syringe,
   FileText,
@@ -12,12 +13,27 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProductImage } from "@/components/ui/product-image";
-import { addVaccination, addMedicalRecord, addWeightLog } from "@/actions/health";
-import { createReminder, updateReminderStatus } from "@/actions/reminders";
+import {
+  addVaccination,
+  addMedicalRecord,
+  addWeightLog,
+  deleteVaccination,
+  deleteMedicalRecord,
+  deleteWeightLog,
+} from "@/actions/health";
+import {
+  createReminder,
+  updateReminderStatus,
+  deleteReminder,
+} from "@/actions/reminders";
+import { WeightChart } from "@/components/pets/weight-chart";
+import { HealthRecordActions } from "@/components/pets/health-record-actions";
 import { createPetShareToken } from "@/actions/pets";
 import type { PetDetail } from "@/lib/queries/pets";
 import type { AnimalKind } from "@prisma/client";
 import { Button } from "@/components/ui/button";
+import { PetGallery } from "@/components/pets/pet-gallery";
+import { PetAiTips } from "@/components/pets/pet-ai-tips";
 
 const kindLabels: Record<AnimalKind, string> = {
   DOG: "Собака",
@@ -30,6 +46,7 @@ const kindLabels: Record<AnimalKind, string> = {
 type Tab = "overview" | "health" | "reminders" | "weight";
 
 export function PetPassport({ pet }: { pet: PetDetail }) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("overview");
   const [pending, startTransition] = useTransition();
 
@@ -87,7 +104,7 @@ export function PetPassport({ pet }: { pet: PetDetail }) {
             className="inline-flex items-center gap-1 rounded-xl border border-stone-200 px-3 py-2 text-sm font-medium hover:bg-stone-50"
           >
             <Download className="h-4 w-4" />
-            PDF
+            Скачать паспорт
           </button>
           <button
             type="button"
@@ -142,6 +159,8 @@ export function PetPassport({ pet }: { pet: PetDetail }) {
             >
               Записаться к ветеринару →
             </Link>
+            <PetGallery petId={pet.id} items={pet.gallery ?? []} />
+            <PetAiTips petId={pet.id} />
           </div>
         )}
 
@@ -164,9 +183,20 @@ export function PetPassport({ pet }: { pet: PetDetail }) {
             </HealthSection>
             <ul className="space-y-2">
               {pet.vaccinations.map((v) => (
-                <li key={v.id} className="rounded-xl bg-emerald-50/50 px-4 py-3 text-sm">
-                  <strong>{v.name}</strong> — {v.date.toLocaleDateString("ru-RU")}
-                  {v.clinic && ` · ${v.clinic}`}
+                <li
+                  key={v.id}
+                  className="flex items-start justify-between rounded-xl bg-emerald-50/50 px-4 py-3 text-sm"
+                >
+                  <span>
+                    <strong>{v.name}</strong> — {v.date.toLocaleDateString("ru-RU")}
+                    {v.clinic && ` · ${v.clinic}`}
+                  </span>
+                  <HealthRecordActions
+                    onDelete={async () => {
+                      const r = await deleteVaccination(v.id);
+                      return { ok: r.ok, error: r.ok ? undefined : r.error };
+                    }}
+                  />
                 </li>
               ))}
             </ul>
@@ -185,12 +215,27 @@ export function PetPassport({ pet }: { pet: PetDetail }) {
               <input name="date" type="date" required className="w-full rounded-xl border border-stone-200 px-3 py-2 text-sm" />
               <input name="providerName" placeholder="Врач / клиника" className="w-full rounded-xl border border-stone-200 px-3 py-2 text-sm" />
               <textarea name="diagnosis" placeholder="Диагноз" rows={2} className="w-full rounded-xl border border-stone-200 px-3 py-2 text-sm" />
+              <textarea name="treatment" placeholder="Лечение" rows={2} className="w-full rounded-xl border border-stone-200 px-3 py-2 text-sm" />
             </HealthSection>
             <ul className="space-y-2">
               {pet.medicalRecords.map((m) => (
-                <li key={m.id} className="rounded-xl border border-stone-100 px-4 py-3 text-sm">
-                  <strong>{m.title}</strong> — {m.date.toLocaleDateString("ru-RU")}
-                  {m.diagnosis && <p className="mt-1 text-stone-600">{m.diagnosis}</p>}
+                <li
+                  key={m.id}
+                  className="flex items-start justify-between rounded-xl border border-stone-100 px-4 py-3 text-sm"
+                >
+                  <div>
+                    <strong>{m.title}</strong> — {m.date.toLocaleDateString("ru-RU")}
+                    {m.diagnosis && <p className="mt-1 text-stone-600">{m.diagnosis}</p>}
+                    {m.treatment && (
+                      <p className="mt-1 text-stone-500">Лечение: {m.treatment}</p>
+                    )}
+                  </div>
+                  <HealthRecordActions
+                    onDelete={async () => {
+                      const r = await deleteMedicalRecord(m.id);
+                      return { ok: r.ok, error: r.ok ? undefined : r.error };
+                    }}
+                  />
                 </li>
               ))}
             </ul>
@@ -242,11 +287,32 @@ export function PetPassport({ pet }: { pet: PetDetail }) {
                         startTransition(async () => {
                           await updateReminderStatus(r.id, "DONE");
                           toast.success("Готово");
+                          router.refresh();
                         })
                       }
                     >
                       ✓
                     </Button>
+                    <Button
+                      variant="secondary"
+                      type="button"
+                      disabled={pending}
+                      onClick={() =>
+                        startTransition(async () => {
+                          await updateReminderStatus(r.id, "SKIPPED");
+                          toast.success("Пропущено");
+                          router.refresh();
+                        })
+                      }
+                    >
+                      Пропустить
+                    </Button>
+                    <HealthRecordActions
+                      onDelete={async () => {
+                        const res = await deleteReminder(r.id);
+                        return { ok: res.ok, error: res.ok ? undefined : res.error };
+                      }}
+                    />
                   </div>
                 </li>
               ))}
@@ -256,6 +322,7 @@ export function PetPassport({ pet }: { pet: PetDetail }) {
 
         {tab === "weight" && (
           <div className="space-y-4">
+            <WeightChart logs={pet.weightLogs} />
             <form
               className="flex gap-2"
               onSubmit={(e) => {
@@ -284,9 +351,20 @@ export function PetPassport({ pet }: { pet: PetDetail }) {
             </form>
             <ul className="space-y-1">
               {pet.weightLogs.map((w) => (
-                <li key={w.id} className="flex justify-between text-sm text-stone-700">
+                <li
+                  key={w.id}
+                  className="flex items-center justify-between text-sm text-stone-700"
+                >
                   <span>{w.date.toLocaleDateString("ru-RU")}</span>
-                  <span className="font-semibold">{w.kg} кг</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold">{w.kg} кг</span>
+                    <HealthRecordActions
+                      onDelete={async () => {
+                        const r = await deleteWeightLog(w.id);
+                        return { ok: r.ok, error: r.ok ? undefined : r.error };
+                      }}
+                    />
+                  </div>
                 </li>
               ))}
             </ul>

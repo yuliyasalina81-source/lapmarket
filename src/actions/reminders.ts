@@ -79,6 +79,50 @@ export async function updateReminderStatus(
   }
 }
 
+export async function updateReminder(
+  id: string,
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const reminder = await prisma.reminder.findFirst({
+      where: { id, pet: { userId: user.id } },
+    });
+    if (!reminder) return { ok: false, error: "Не найдено" };
+
+    const title = (formData.get("title") as string)?.trim();
+    const dueAtRaw = formData.get("dueAt") as string;
+
+    await prisma.reminder.update({
+      where: { id },
+      data: {
+        title: title || reminder.title,
+        dueAt: dueAtRaw ? new Date(dueAtRaw) : reminder.dueAt,
+      },
+    });
+
+    revalidatePath(`/pets/${reminder.petId}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Ошибка обновления" };
+  }
+}
+
+export async function deleteReminder(id: string): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const reminder = await prisma.reminder.findFirst({
+      where: { id, pet: { userId: user.id } },
+    });
+    if (!reminder) return { ok: false, error: "Не найдено" };
+    await prisma.reminder.delete({ where: { id } });
+    revalidatePath(`/pets/${reminder.petId}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Ошибка удаления" };
+  }
+}
+
 export async function processDueReminders(): Promise<{ processed: number }> {
   const now = new Date();
   const inThreeDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);

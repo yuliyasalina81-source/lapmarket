@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
-
-export const dynamic = "force-dynamic";
+import { Suspense } from "react";
 import { Inter } from "next/font/google";
+import { auth } from "@/lib/auth";
 import { Navbar } from "@/components/layout/navbar";
+import { NavbarNotifications } from "@/components/layout/navbar-notifications";
 import { Footer } from "@/components/layout/footer";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { SessionProvider } from "@/components/layout/session-provider";
@@ -22,24 +23,35 @@ export const metadata: Metadata = {
     "Цифровой паспорт питомца: прививки, напоминания, медкарта. Маркет, объявления, ветеринары и соцсеть.",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, title: "ЛапМаркет" },
-  icons: { icon: "/favicon.ico" },
+  icons: {
+    icon: [{ url: "/favicon.ico" }, { url: "/icon.svg", type: "image/svg+xml" }],
+    apple: "/icon.svg",
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#059669",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="ru" className={`${inter.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <div className="app-gradient flex min-h-full flex-col">
-          <SessionProvider>
-            <Navbar />
+          <SessionProvider session={session}>
+            <Navbar
+              notifications={
+                <Suspense fallback={null}>
+                  <NavbarNotifications />
+                </Suspense>
+              }
+            />
             <main className="flex-1 pb-20 md:pb-0">{children}</main>
             <Footer />
             <MobileBottomNav />

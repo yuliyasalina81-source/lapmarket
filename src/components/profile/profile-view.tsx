@@ -107,13 +107,13 @@ export function ProfileView({
 }) {
 
   const statItems = [
-
-    { label: "Постов", value: stats.postCount },
-
+    {
+      label: "Постов",
+      value: stats.postCount,
+      href: `/users/${user.id}`,
+    },
     { label: "Питомцев", value: user.pets.length },
-
     { label: "Записей", value: stats.bookingCount },
-
   ];
 
 
@@ -315,15 +315,19 @@ export function ProfileView({
           <div className="mt-6 grid grid-cols-3 gap-3 border-t border-stone-100 pt-6">
 
             {statItems.map((s) => (
-
               <div key={s.label} className="text-center">
-
-                <p className="text-2xl font-bold text-emerald-700">{s.value}</p>
-
-                <p className="text-xs text-stone-500">{s.label}</p>
-
+                {"href" in s && s.href ? (
+                  <Link href={s.href} className="block hover:opacity-80">
+                    <p className="text-2xl font-bold text-emerald-700">{s.value}</p>
+                    <p className="text-xs text-stone-500">{s.label}</p>
+                  </Link>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold text-emerald-700">{s.value}</p>
+                    <p className="text-xs text-stone-500">{s.label}</p>
+                  </>
+                )}
               </div>
-
             ))}
 
           </div>

@@ -35,7 +35,13 @@ export function ListingForm() {
         После создания объявление появится после проверки администратором
       </p>
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-        <ImageUpload name="files" multiple maxFiles={6} label="Фото питомца (до 6)" />
+        <ImageUpload
+          name="mediaIds"
+          folder="animals"
+          multiple
+          maxFiles={6}
+          label="Фото питомца (до 6)"
+        />
         <Field label="Имя" name="name" required />
         <div>
           <label className="text-sm font-medium text-stone-700">Вид</label>

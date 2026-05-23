@@ -2,15 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { mobileNav } from "@/lib/nav";
+import { User } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { mobileNav, type NavItem } from "@/lib/nav";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+const profileTab: NavItem = {
+  href: "/profile",
+  label: "Профиль",
+  icon: User,
+};
+
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const { status } = useSession();
+
+  const items =
+    status === "authenticated" ? [...mobileNav, profileTab] : mobileNav;
 
   return (
     <nav
@@ -18,7 +30,7 @@ export function MobileBottomNav() {
       aria-label="Нижняя навигация"
     >
       <ul className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1">
-        {mobileNav.map(({ href, label, icon: Icon }) => {
+        {items.map(({ href, label, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <li key={href} className="flex-1">

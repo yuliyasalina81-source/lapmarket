@@ -58,6 +58,7 @@ export async function createOrderRequest(
     });
 
     revalidatePath("/seller/orders");
+    revalidatePath("/profile/orders");
     return { ok: true, id: order.id };
   } catch {
     return { ok: false, error: "Не удалось отправить запрос" };

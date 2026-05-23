@@ -1,18 +1,64 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { PawPrint, Loader2 } from "lucide-react";
-import { loginUser, type LoginState } from "@/actions/login";
-
-const initial: LoginState = {};
+import { getSession, signIn } from "next-auth/react";
+import { loginSchema } from "@/lib/validations/auth";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered") === "1";
-  const [state, action, pending] = useActionState(loginUser, initial);
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/profile";
+
+  const [error, setError] = useState<string>();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>();
+  const [pending, setPending] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(undefined);
+    setFieldErrors(undefined);
+    setPending(true);
+
+    const formData = new FormData(e.currentTarget);
+    const raw = {
+      email: formData.get("email"),
+      password: formData.get("password"),
+    };
+
+    const parsed = loginSchema.safeParse(raw);
+    if (!parsed.success) {
+      setFieldErrors(
+        parsed.error.flatten().fieldErrors as Record<string, string[]>
+      );
+      setPending(false);
+      return;
+    }
+
+    try {
+      const result = await signIn("credentials", {
+        email: parsed.data.email.toLowerCase().trim(),
+        password: parsed.data.password,
+        redirect: false,
+        callbackUrl,
+      });
+
+      if (!result?.ok || result.error) {
+        setError("Неверный email или пароль");
+        setPending(false);
+        return;
+      }
+
+      await getSession();
+      window.location.assign(callbackUrl);
+    } catch {
+      setError("Ошибка входа. Попробуйте снова.");
+      setPending(false);
+    }
+  }
 
   return (
     <motion.div
@@ -37,13 +83,13 @@ export function LoginForm() {
           </p>
         )}
 
-        {state.error && (
+        {error && (
           <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-            {state.error}
+            {error}
           </p>
         )}
 
-        <form action={action} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="email"
@@ -59,9 +105,9 @@ export function LoginForm() {
               required
               className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-stone-900 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
             />
-            {state.fieldErrors?.email && (
+            {fieldErrors?.email && (
               <p className="mt-1 text-xs text-red-600">
-                {state.fieldErrors.email[0]}
+                {fieldErrors.email[0]}
               </p>
             )}
           </div>
@@ -81,9 +127,9 @@ export function LoginForm() {
               required
               className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-stone-900 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
             />
-            {state.fieldErrors?.password && (
+            {fieldErrors?.password && (
               <p className="mt-1 text-xs text-red-600">
-                {state.fieldErrors.password[0]}
+                {fieldErrors.password[0]}
               </p>
             )}
           </div>

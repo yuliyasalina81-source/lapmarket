@@ -99,3 +99,115 @@ export async function addWeightLog(
     return { ok: false, error: "Ошибка" };
   }
 }
+
+export async function updateVaccination(
+  id: string,
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const row = await prisma.vaccination.findFirst({
+      where: { id, pet: { userId: user.id } },
+    });
+    if (!row) return { ok: false, error: "Не найдено" };
+
+    const name = (formData.get("name") as string)?.trim();
+    const dateRaw = formData.get("date") as string;
+    const nextDueRaw = formData.get("nextDueAt") as string;
+    const clinic = (formData.get("clinic") as string)?.trim() || undefined;
+
+    await prisma.vaccination.update({
+      where: { id },
+      data: {
+        name: name || row.name,
+        date: dateRaw ? new Date(dateRaw) : row.date,
+        nextDueAt: nextDueRaw ? new Date(nextDueRaw) : null,
+        clinic,
+      },
+    });
+    revalidatePath(`/pets/${row.petId}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Ошибка обновления" };
+  }
+}
+
+export async function deleteVaccination(id: string): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const row = await prisma.vaccination.findFirst({
+      where: { id, pet: { userId: user.id } },
+    });
+    if (!row) return { ok: false, error: "Не найдено" };
+    await prisma.vaccination.delete({ where: { id } });
+    revalidatePath(`/pets/${row.petId}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Ошибка удаления" };
+  }
+}
+
+export async function updateMedicalRecord(
+  id: string,
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const row = await prisma.medicalRecord.findFirst({
+      where: { id, pet: { userId: user.id } },
+    });
+    if (!row) return { ok: false, error: "Не найдено" };
+
+    const title = (formData.get("title") as string)?.trim();
+    const dateRaw = formData.get("date") as string;
+    const diagnosis = (formData.get("diagnosis") as string)?.trim() || undefined;
+    const treatment = (formData.get("treatment") as string)?.trim() || undefined;
+    const providerName =
+      (formData.get("providerName") as string)?.trim() || undefined;
+
+    await prisma.medicalRecord.update({
+      where: { id },
+      data: {
+        title: title || row.title,
+        date: dateRaw ? new Date(dateRaw) : row.date,
+        diagnosis,
+        treatment,
+        providerName,
+      },
+    });
+    revalidatePath(`/pets/${row.petId}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Ошибка обновления" };
+  }
+}
+
+export async function deleteMedicalRecord(id: string): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const row = await prisma.medicalRecord.findFirst({
+      where: { id, pet: { userId: user.id } },
+    });
+    if (!row) return { ok: false, error: "Не найдено" };
+    await prisma.medicalRecord.delete({ where: { id } });
+    revalidatePath(`/pets/${row.petId}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Ошибка удаления" };
+  }
+}
+
+export async function deleteWeightLog(id: string): Promise<ActionResult> {
+  try {
+    const user = await requireSessionUser();
+    const row = await prisma.weightLog.findFirst({
+      where: { id, pet: { userId: user.id } },
+    });
+    if (!row) return { ok: false, error: "Не найдено" };
+    await prisma.weightLog.delete({ where: { id } });
+    revalidatePath(`/pets/${row.petId}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Ошибка удаления" };
+  }
+}

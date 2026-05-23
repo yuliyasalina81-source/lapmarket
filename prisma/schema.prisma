@@ -103,6 +103,8 @@ enum NotificationType {
   BOOKING_UPDATE
   REMINDER
   ORDER_REQUEST
+  POST_LIKE
+  POST_COMMENT
   SYSTEM
 }
 
@@ -146,6 +148,8 @@ model User {
   orderRequestsSeller OrderRequest[]   @relation("OrderSeller")
   productReviews      ProductReview[]
   serviceReviews      ServiceReview[]
+  pushSubscriptions   PushSubscription[]
+  contactMessages     ContactMessage[]
 }
 
 model Account {
@@ -223,8 +227,23 @@ model Pet {
   bookings       ServiceBooking[]
   posts          Post[]
   shareTokens    PetShareToken[]
+  gallery        PetMedia[]
 
   @@index([userId])
+}
+
+model PetMedia {
+  id        String   @id @default(cuid())
+  petId     String
+  mediaId   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  pet   Pet        @relation(fields: [petId], references: [id], onDelete: Cascade)
+  media MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([petId, mediaId])
+  @@index([petId])
 }
 
 model PetShareToken {
@@ -329,10 +348,12 @@ model MediaAsset {
 
   user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   productImages       ProductImage[]
+  postImages          PostImage[]
   animalListingImages AnimalListingImage[]
   posts               Post[]
   serviceProviders    ServiceProvider[]
   petAvatars          Pet[]                @relation("PetAvatar")
+  petGallery          PetMedia[]
 }
 
 model Product {
@@ -448,10 +469,38 @@ model ContactRequest {
   status     ContactRequestStatus @default(NEW)
   createdAt  DateTime             @default(now())
 
-  listing  AnimalListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  fromUser User          @relation("ContactFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  listing  AnimalListing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  fromUser User             @relation("ContactFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  messages ContactMessage[]
 
   @@index([listingId, status])
+}
+
+model ContactMessage {
+  id               String    @id @default(cuid())
+  contactRequestId String
+  senderId         String
+  body             String    @db.Text
+  readAt           DateTime?
+  createdAt        DateTime  @default(now())
+
+  contactRequest ContactRequest @relation(fields: [contactRequestId], references: [id], onDelete: Cascade)
+  sender         User           @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([contactRequestId, createdAt])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model ServiceProvider {
@@ -524,8 +573,21 @@ model Post {
   author User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
   pet    Pet?        @relation(fields: [petId], references: [id], onDelete: SetNull)
   media  MediaAsset? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  images PostImage[]
   likes  PostLike[]
   comments Comment[]
+}
+
+model PostImage {
+  id        String @id @default(cuid())
+  postId    String
+  mediaId   String
+  sortOrder Int    @default(0)
+
+  post  Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  media MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, mediaId])
 }
 
 model PostLike {
