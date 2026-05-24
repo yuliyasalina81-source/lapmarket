@@ -71,6 +71,21 @@ export async function middleware(req: NextRequest) {
   }
 
   if (isAuthPage && isLoggedIn) {
+    const target =
+      role === "SPECIALIST"
+        ? "/dashboard/specialist"
+        : role === "ADMIN"
+          ? "/admin"
+          : "/profile";
+    return NextResponse.redirect(new URL(target, nextUrl.origin));
+  }
+
+  if (
+    pathname.startsWith("/dashboard/specialist") &&
+    isLoggedIn &&
+    role !== "SPECIALIST" &&
+    role !== "ADMIN"
+  ) {
     return NextResponse.redirect(new URL("/profile", nextUrl.origin));
   }
 
@@ -81,6 +96,7 @@ export const config = {
   matcher: [
     "/profile",
     "/profile/:path*",
+    "/dashboard/:path*",
     "/settings",
     "/seller/:path*",
     "/listings/:path*",

@@ -6,14 +6,14 @@ import { SERVICE_KIND_LABELS } from "@/lib/constants";
 import { ProductImage } from "@/components/ui/product-image";
 import { BadgeCheck, MapPin, Star } from "lucide-react";
 import { motion } from "framer-motion";
-import type { ServiceProviderWithMedia } from "@/lib/queries/services";
+import type { CatalogSpecialist } from "@/lib/services/catalog-types";
 
 export function ServiceCard({
   service,
   onBook,
 }: {
-  service: ServiceProviderWithMedia;
-  onBook: (service: ServiceProviderWithMedia) => void;
+  service: CatalogSpecialist;
+  onBook: (service: CatalogSpecialist) => void;
 }) {
   const imageUrl = service.media?.url ?? null;
 

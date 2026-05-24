@@ -70,6 +70,7 @@ npm run dev
 
 - `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`
 - `BLOB_READ_WRITE_TOKEN` — загрузка фото
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — маркетплейс услуг ([инструкция](docs/SUPABASE_SERVICES.md))
 - `RESEND_API_KEY`, `EMAIL_FROM` — сброс пароля
 - `CRON_SECRET` — `/api/cron/reminders` (Vercel Cron)
 

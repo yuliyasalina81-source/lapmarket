@@ -124,7 +124,7 @@ export function ProfileView({
 
     { href: "/feed", icon: Heart, label: "Лента" },
 
-    { href: "/profile/bookings", icon: Calendar, label: "Мои записи" },
+    { href: "/dashboard/client", icon: Calendar, label: "Мои записи" },
 
     { href: "/settings", icon: Settings, label: "Настройки аккаунта" },
 
@@ -136,6 +136,14 @@ export function ProfileView({
 
     roleLinks.push({ href: "/profile/inbox", icon: Inbox, label: "Входящие запросы" });
 
+  }
+
+  if (user.role === "SPECIALIST") {
+    roleLinks.push({
+      href: "/dashboard/specialist",
+      icon: Calendar,
+      label: "Кабинет специалиста",
+    });
   }
 
   if (hasProvider) {

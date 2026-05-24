@@ -25,8 +25,17 @@ import type {
   getAdminServiceProviders,
 } from "@/lib/queries/admin";
 import type { ProductStatus, UserRole } from "@prisma/client";
+import { SupabaseSpecialistsPanel } from "@/components/admin/supabase-specialists-panel";
 
-type Tab = "certs" | "listings" | "users" | "products" | "posts" | "reviews" | "services";
+type Tab =
+  | "certs"
+  | "listings"
+  | "users"
+  | "products"
+  | "posts"
+  | "reviews"
+  | "services"
+  | "specialists";
 
 export function AdminPanel({
   certifications,
@@ -37,6 +46,7 @@ export function AdminPanel({
   productReviews,
   serviceReviews,
   serviceProviders,
+  supabaseSpecialists = [],
 }: {
   certifications: Awaited<ReturnType<typeof getPendingCertifications>>;
   listings: Awaited<ReturnType<typeof getPendingListingsForAdmin>>;
@@ -46,6 +56,15 @@ export function AdminPanel({
   productReviews: Awaited<ReturnType<typeof getAdminProductReviews>>;
   serviceReviews: Awaited<ReturnType<typeof getAdminServiceReviews>>;
   serviceProviders: Awaited<ReturnType<typeof getAdminServiceProviders>>;
+  supabaseSpecialists?: Array<{
+    id: string;
+    user_id: string;
+    kind: string;
+    address: string;
+    license_url: string | null;
+    verification_status: string;
+    profile?: { full_name: string; city: string | null };
+  }>;
 }) {
   const [tab, setTab] = useState<Tab>("certs");
   const [pending, startTransition] = useTransition();
@@ -57,7 +76,11 @@ export function AdminPanel({
     { id: "products", label: "Товары" },
     { id: "posts", label: "Посты" },
     { id: "reviews", label: "Отзывы" },
-    { id: "services", label: "Услуги" },
+    { id: "services", label: "Услуги (Prisma)" },
+    {
+      id: "specialists",
+      label: `Специалисты Supabase (${supabaseSpecialists.filter((s) => s.verification_status === "pending").length})`,
+    },
   ];
 
   return (
@@ -303,6 +326,10 @@ export function AdminPanel({
               </AdminList>
             </div>
           </div>
+        )}
+
+        {tab === "specialists" && (
+          <SupabaseSpecialistsPanel specialists={supabaseSpecialists} />
         )}
 
         {tab === "services" && (

@@ -17,7 +17,10 @@ export const registerSchema = z
       .max(80),
     city: z.string().max(100).optional(),
     avatar: z.string().max(10).optional(),
-    role: z.enum(["OWNER", "SELLER", "SHELTER"]),
+    role: z.enum(["OWNER", "SELLER", "SHELTER", "SPECIALIST"]),
+    specialistKind: z.enum(["vet", "groomer"]).optional(),
+    specialistAddress: z.string().optional(),
+    licenseFile: z.any().optional(),
     pets: z.string().optional(),
     shopName: z.string().optional(),
     shopDescription: z.string().optional(),
@@ -39,6 +42,29 @@ export const registerSchema = z
           code: z.ZodIssueCode.custom,
           message: "Добавьте описание магазина",
           path: ["shopDescription"],
+        });
+      }
+    }
+    if (data.role === "SPECIALIST") {
+      if (!data.specialistKind) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Выберите тип специалиста",
+          path: ["specialistKind"],
+        });
+      }
+      if (!data.specialistAddress?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Укажите адрес приёма",
+          path: ["specialistAddress"],
+        });
+      }
+      if (!data.city?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Укажите город",
+          path: ["city"],
         });
       }
     }

@@ -8,10 +8,11 @@ import { registerUser, type RegisterState } from "@/actions/auth";
 
 const initial: RegisterState = {};
 
-type Role = "OWNER" | "SELLER" | "SHELTER";
+type Role = "OWNER" | "SELLER" | "SHELTER" | "SPECIALIST";
 
 const roles: { value: Role; label: string; desc: string }[] = [
-  { value: "OWNER", label: "Владелец", desc: "Питомцы, лента, покупки" },
+  { value: "OWNER", label: "Клиент", desc: "Питомцы, запись к врачу" },
+  { value: "SPECIALIST", label: "Специалист", desc: "Ветеринар или грумер" },
   { value: "SELLER", label: "Продавец", desc: "Товары для животных" },
   { value: "SHELTER", label: "Приют", desc: "Животные в добрые руки" },
 ];
@@ -50,7 +51,7 @@ export function RegisterForm() {
             <legend className="mb-2 text-sm font-medium text-stone-700">
               Тип аккаунта
             </legend>
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid gap-2 sm:grid-cols-2">
               {roles.map((r) => (
                 <button
                   key={r.value}
@@ -80,7 +81,9 @@ export function RegisterForm() {
                 ? "Контактное имя"
                 : role === "SHELTER"
                   ? "Контактное лицо"
-                  : "Имя"}
+                  : role === "SPECIALIST"
+                    ? "Имя / клиника"
+                    : "Имя"}
             </label>
             <input
               id="displayName"
@@ -175,6 +178,77 @@ export function RegisterForm() {
                     name="pets"
                     placeholder="Боня, Марс"
                     className="w-full rounded-xl border border-stone-200 px-4 py-2.5 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {role === "SPECIALIST" && (
+              <motion.div
+                key="specialist"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-4 overflow-hidden"
+              >
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                    Тип
+                  </label>
+                  <select
+                    name="specialistKind"
+                    required
+                    className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
+                  >
+                    <option value="vet">Ветеринар</option>
+                    <option value="groomer">Грумер</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    htmlFor="city"
+                    className="mb-1.5 block text-sm font-medium text-stone-700"
+                  >
+                    Город
+                  </label>
+                  <input
+                    id="city"
+                    name="city"
+                    required
+                    placeholder="Москва"
+                    className="w-full rounded-xl border border-stone-200 px-4 py-2.5 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  />
+                  {state.fieldErrors?.city && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {state.fieldErrors.city[0]}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                    Адрес приёма
+                  </label>
+                  <input
+                    name="specialistAddress"
+                    required
+                    className="w-full rounded-xl border border-stone-200 px-4 py-2.5 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  />
+                  {state.fieldErrors?.specialistAddress && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {state.fieldErrors.specialistAddress[0]}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                    Лицензия (PDF или фото)
+                  </label>
+                  <input
+                    name="license"
+                    type="file"
+                    accept="image/*,.pdf"
+                    required
+                    className="w-full text-sm"
                   />
                 </div>
               </motion.div>

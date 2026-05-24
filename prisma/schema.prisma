@@ -11,6 +11,7 @@ enum UserRole {
   OWNER
   SELLER
   SHELTER
+  SPECIALIST
   ADMIN
 }
 

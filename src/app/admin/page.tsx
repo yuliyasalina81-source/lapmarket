@@ -11,6 +11,8 @@ import {
   getAdminServiceProviders,
 } from "@/lib/queries/admin";
 import { AdminPanel } from "@/components/admin/admin-panel";
+import { getAdminSpecialists } from "@/lib/queries/services-supabase";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
 
 export const metadata = { title: "Админ — ЛапМаркет" };
 
@@ -29,6 +31,7 @@ export default async function AdminPage() {
     productReviews,
     serviceReviews,
     serviceProviders,
+    supabaseSpecialists,
   ] = await Promise.all([
     getPendingCertifications(),
     getPendingListingsForAdmin(),
@@ -38,6 +41,7 @@ export default async function AdminPage() {
     getAdminProductReviews(),
     getAdminServiceReviews(),
     getAdminServiceProviders(),
+    isSupabaseConfigured() ? getAdminSpecialists() : Promise.resolve([]),
   ]);
 
   return (
@@ -50,6 +54,7 @@ export default async function AdminPage() {
       productReviews={productReviews}
       serviceReviews={serviceReviews}
       serviceProviders={serviceProviders}
+      supabaseSpecialists={supabaseSpecialists}
     />
   );
 }

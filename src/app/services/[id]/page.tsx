@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { getServiceProviderById } from "@/lib/queries/services";
+import { getSpecialistById } from "@/lib/queries/services-supabase";
 import { getUserPets } from "@/lib/queries/pets";
 import { SERVICE_KIND_LABELS } from "@/lib/constants";
 import { formatPrice, formatRating } from "@/lib/format";
 import { ProductImage } from "@/components/ui/product-image";
 import { BookingForm } from "@/components/services/booking-form";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { BadgeCheck, Star } from "lucide-react";
 
 export default async function ServiceDetailPage({
@@ -19,7 +20,7 @@ export default async function ServiceDetailPage({
   const { id } = await params;
   const { petId } = await searchParams;
   const session = await auth();
-  const service = await getServiceProviderById(id);
+  const service = await getSpecialistById(id);
   if (!service) notFound();
 
   const pets = session?.user?.id
@@ -49,6 +50,9 @@ export default async function ServiceDetailPage({
           <p className="mt-2 text-stone-600">
             {service.city}, {service.address}
           </p>
+          {service.about && (
+            <p className="mt-3 text-sm text-stone-600">{service.about}</p>
+          )}
           <p className="mt-2 text-sm text-stone-600">{service.specialties.join(" · ")}</p>
           <div className="mt-4 flex gap-4 text-sm">
             <span className="flex items-center gap-1">
@@ -60,8 +64,10 @@ export default async function ServiceDetailPage({
             </span>
           </div>
           <BookingForm
-            providerId={service.id}
+            specialistId={service.id}
             providerName={service.name}
+            services={service.services}
+            useSupabase={isSupabaseConfigured()}
             pets={pets.map((p) => ({ id: p.id, name: p.name }))}
             defaultPetId={petId}
           />

@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { MapPin, List } from "lucide-react";
-import type { ServiceProviderWithMedia } from "@/lib/queries/services";
+import type { CatalogSpecialist } from "@/lib/services/catalog-types";
 
 export function ServicesMap({
   providers,
 }: {
-  providers: ServiceProviderWithMedia[];
+  providers: CatalogSpecialist[];
 }) {
   const [showMap, setShowMap] = useState(false);
 
