@@ -16,6 +16,7 @@ import { useState, useRef, useEffect, type ReactNode } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { isImageUrl } from "@/lib/constants";
+import { profileNavHref } from "@/lib/auth-redirect";
 
 const nav = [
   { href: "/pets", label: "Паспорт" },
@@ -39,6 +40,10 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
 
   const user = session?.user;
   const isLoggedIn = status === "authenticated" && !!user;
+  const profileHref = profileNavHref(isLoggedIn);
+  const menuNav = isLoggedIn
+    ? nav
+    : nav.filter((item) => item.href !== "/profile");
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -120,7 +125,7 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
           ) : isLoggedIn ? (
             <>
             <Link
-              href="/profile"
+              href={profileHref}
               className="flex items-center sm:hidden"
               aria-label="Профиль"
             >
@@ -201,20 +206,29 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
             </div>
             </>
           ) : (
-            <div className="hidden items-center gap-2 sm:flex">
+            <>
               <Link
-                href="/login"
-                className="rounded-xl px-3.5 py-2 text-sm font-medium text-stone-600 transition hover:bg-emerald-50 hover:text-emerald-800"
+                href={profileHref}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-stone-200 text-stone-500 transition hover:border-emerald-200 hover:text-emerald-700 sm:hidden"
+                aria-label="Войти в профиль"
               >
-                Войти
+                <User className="h-5 w-5" aria-hidden />
               </Link>
-              <Link
-                href="/register"
-                className="rounded-xl bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
-              >
-                Регистрация
-              </Link>
-            </div>
+              <div className="hidden items-center gap-2 sm:flex">
+                <Link
+                  href="/login"
+                  className="rounded-xl px-3.5 py-2 text-sm font-medium text-stone-600 transition hover:bg-emerald-50 hover:text-emerald-800"
+                >
+                  Войти
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-xl bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                >
+                  Регистрация
+                </Link>
+              </div>
+            </>
           )}
 
           <button
@@ -239,7 +253,7 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
             aria-label="Мобильное меню"
           >
             <div className="flex flex-col gap-1 px-4 py-3">
-              {nav.map((item) => {
+              {menuNav.map((item) => {
                 const active = pathname === item.href;
                 return (
                   <Link

@@ -1,6 +1,5 @@
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
 const protectedPrefixes = [
   "/profile",
@@ -14,36 +13,13 @@ const protectedPrefixes = [
 
 const sellerPrefixes = ["/seller"];
 
-function getAuthSecret(): string | undefined {
-  return process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
-}
-
-export async function middleware(req: NextRequest) {
+export default auth((req) => {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
 
-  // Never run auth logic for static assets / SW (no User-Agent filtering)
-  if (
-    pathname === "/sw.js" ||
-    pathname === "/manifest.json" ||
-    pathname === "/offline.html" ||
-    pathname.startsWith("/_next/")
-  ) {
-    return NextResponse.next();
-  }
-
-  const secret = getAuthSecret();
-  if (!secret) {
-    return NextResponse.next();
-  }
-
-  const token = await getToken({
-    req,
-    secret,
-  });
-
-  const isLoggedIn = !!token;
-  const role = token?.role as string | undefined;
+  const session = req.auth;
+  const isLoggedIn = !!session?.user;
+  const role = session?.user?.role as string | undefined;
 
   const isProtected = protectedPrefixes.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
@@ -90,7 +66,7 @@ export async function middleware(req: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [

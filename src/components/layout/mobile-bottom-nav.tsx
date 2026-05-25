@@ -5,24 +5,29 @@ import { usePathname } from "next/navigation";
 import { User } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { mobileNav, type NavItem } from "@/lib/nav";
+import { profileNavHref } from "@/lib/auth-redirect";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
+  if (href.startsWith("/login")) {
+    return pathname === "/profile" || pathname.startsWith("/profile/");
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
-
-const profileTab: NavItem = {
-  href: "/profile",
-  label: "Профиль",
-  icon: User,
-};
 
 export function MobileBottomNav() {
   const pathname = usePathname();
   const { status } = useSession();
 
-  const items =
-    status === "authenticated" ? [...mobileNav, profileTab] : mobileNav;
+  const profileHref = profileNavHref(status === "authenticated");
+
+  const profileTab: NavItem = {
+    href: profileHref,
+    label: "Профиль",
+    icon: User,
+  };
+
+  const items = [...mobileNav, profileTab];
 
   return (
     <nav
