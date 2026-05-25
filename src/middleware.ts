@@ -1,5 +1,6 @@
-import { auth } from "@/lib/auth";
+import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 const protectedPrefixes = [
   "/profile",
@@ -13,13 +14,28 @@ const protectedPrefixes = [
 
 const sellerPrefixes = ["/seller"];
 
-export default auth((req) => {
+function getAuthSecret(): string | undefined {
+  return process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+}
+
+export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
 
-  const session = req.auth;
-  const isLoggedIn = !!session?.user;
-  const role = session?.user?.role as string | undefined;
+  const secret = getAuthSecret();
+  if (!secret) {
+    return NextResponse.next();
+  }
+
+  const secureCookie = nextUrl.protocol === "https:";
+  const token = await getToken({
+    req,
+    secret,
+    secureCookie,
+  });
+
+  const isLoggedIn = !!token;
+  const role = token?.role as string | undefined;
 
   const isProtected = protectedPrefixes.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
@@ -66,7 +82,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
