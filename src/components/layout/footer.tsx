@@ -45,6 +45,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/for-business" className="hover:text-emerald-600">
+                  Для бизнеса
+                </Link>
+              </li>
+              <li>
                 <Link href="/profile" className="hover:text-emerald-600">
                   Профиль
                 </Link>

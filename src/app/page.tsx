@@ -11,6 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { PromoBanner } from "@/components/marketing/PromoBanner";
 
 const features = [
   {
@@ -114,6 +115,10 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <PromoBanner className="-mt-6 mb-4 sm:-mt-8" />
+      </div>
 
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">

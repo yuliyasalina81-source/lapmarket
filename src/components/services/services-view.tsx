@@ -13,6 +13,7 @@ import { ServiceCard } from "./service-card";
 import { ServicesMap } from "./services-map";
 import { Modal } from "@/components/ui/modal";
 import { SlotPicker } from "./slot-picker";
+import { PromoBanner } from "@/components/marketing/PromoBanner";
 
 export function ServicesView({
   providers,
@@ -133,6 +134,8 @@ export function ServicesView({
       <p className="mt-2 text-stone-600">
         Запись онлайн, проверенные специалисты с отзывами
       </p>
+
+      <PromoBanner className="mt-6" />
 
       <div className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-stone-100 bg-white p-4">
         <div>

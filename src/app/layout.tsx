@@ -11,6 +11,7 @@ import { AppToaster } from "@/components/ui/toaster";
 import { InstallBanner } from "@/components/pwa/install-banner";
 import { MobileFallback } from "@/components/pwa/mobile-fallback";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { ContactChatWidget } from "@/components/marketing/ContactChatWidget";
 import "./globals.css";
 
 const inter = Inter({
@@ -60,6 +61,7 @@ export default async function RootLayout({
             <main className="flex-1 pb-20 md:pb-0">{children}</main>
             <Footer />
             <MobileBottomNav />
+            <ContactChatWidget />
             <AppToaster />
             <InstallBanner />
             <MobileFallback />

@@ -24,6 +24,7 @@ const nav = [
   { href: "/market", label: "Товары" },
   { href: "/animals", label: "Объявления" },
   { href: "/services", label: "Услуги" },
+  { href: "/for-business", label: "Для бизнеса" },
   { href: "/profile", label: "Профиль" },
 ];
 
