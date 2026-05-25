@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { PawPrint, Loader2 } from "lucide-react";
@@ -17,9 +17,18 @@ const roles: { value: Role; label: string; desc: string }[] = [
   { value: "SHELTER", label: "Приют", desc: "Животные в добрые руки" },
 ];
 
+const MAX_LICENSE_MB = 4;
+
 export function RegisterForm() {
   const [role, setRole] = useState<Role>("OWNER");
   const [state, action, pending] = useActionState(registerUser, initial);
+  const [licenseHint, setLicenseHint] = useState<string>();
+
+  useEffect(() => {
+    if (state.redirectTo) {
+      window.location.assign(state.redirectTo);
+    }
+  }, [state.redirectTo]);
 
   return (
     <motion.div
@@ -246,10 +255,26 @@ export function RegisterForm() {
                   <input
                     name="license"
                     type="file"
-                    accept="image/*,.pdf"
+                    accept="image/*,.pdf,application/pdf"
                     required
                     className="w-full text-sm"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f && f.size > MAX_LICENSE_MB * 1024 * 1024) {
+                        setLicenseHint(
+                          `Файл ${(f.size / 1024 / 1024).toFixed(1)} МБ — максимум ${MAX_LICENSE_MB} МБ`
+                        );
+                      } else {
+                        setLicenseHint(undefined);
+                      }
+                    }}
                   />
+                  {licenseHint && (
+                    <p className="mt-1 text-xs text-amber-700">{licenseHint}</p>
+                  )}
+                  <p className="mt-1 text-xs text-stone-500">
+                    Фото с телефона до {MAX_LICENSE_MB} МБ (JPEG, PNG или PDF)
+                  </p>
                 </div>
               </motion.div>
             )}

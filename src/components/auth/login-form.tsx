@@ -39,6 +39,7 @@ export function LoginForm() {
   const registered = searchParams.get("registered") === "1";
   const registeredSpecialist = searchParams.get("registered") === "specialist";
   const supabasePending = searchParams.get("supabase") === "pending";
+  const profilePending = searchParams.get("profile") === "pending";
   const callbackRedirect = searchParams.get("callbackUrl");
   const defaultRedirect = resolvePostLoginPath();
 
@@ -125,8 +126,10 @@ export function LoginForm() {
         {registeredSpecialist && (
           <p className="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             {supabasePending
-              ? "Аккаунт специалиста создан. Войдите и дождитесь подключения каталога услуг (Supabase)."
-              : "Аккаунт специалиста создан. Войдите — профиль на проверке у модератора."}
+              ? "Аккаунт специалиста создан. Войдите — каталог услуг подключится после настройки сервера."
+              : profilePending
+                ? "Аккаунт создан. Войдите и в кабинете специалиста загрузите лицензию и услуги."
+                : "Аккаунт специалиста создан. Войдите — профиль на проверке у модератора."}
           </p>
         )}
 

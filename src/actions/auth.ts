@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { registerSchema } from "@/lib/validations/auth";
@@ -13,47 +12,70 @@ import type { SpecialistKind } from "@/lib/supabase/database.types";
 export type RegisterState = {
   error?: string;
   fieldErrors?: Record<string, string[]>;
+  /** Клиентский редирект (не использовать redirect() — ломает useActionState на мобильных) */
+  redirectTo?: string;
 };
+
+const MAX_LICENSE_BYTES = 4 * 1024 * 1024;
 
 function formatRegisterError(error: unknown): string {
   if (error instanceof Error) {
     const msg = error.message;
-    if (msg.includes("profiles") || msg.includes("specialist_profiles")) {
-      return "База Supabase не настроена: выполните SQL из supabase/migrations/001_services_marketplace.sql в Supabase SQL Editor.";
+    if (msg.includes("Body exceeded") || msg.includes("413")) {
+      return "Файл лицензии слишком большой (макс. 4 МБ). Сделайте фото меньше или загрузите PDF.";
     }
-    if (msg.includes("Bucket not found") || msg.includes("licenses")) {
-      return "Создайте bucket «licenses» в Supabase Storage (private), затем повторите регистрацию или загрузите лицензию в кабинете специалиста.";
+    if (msg.includes("profiles") || msg.includes("specialist_profiles")) {
+      return "Каталог услуг временно недоступен. Аккаунт можно создать — войдите и загрузите лицензию в кабинете специалиста.";
+    }
+    if (msg.includes("Bucket not found")) {
+      return "Аккаунт будет создан без файла лицензии. После входа загрузите лицензию в кабинете специалиста.";
     }
     if (msg.includes("Invalid enum value") || msg.includes("UserRole")) {
-      return "Обновите базу данных: выполните npx prisma db push";
+      return "Обновите базу данных на сервере (роль SPECIALIST).";
     }
     return msg;
   }
   return "Не удалось создать аккаунт. Попробуйте позже.";
 }
 
+async function safeUpsertProfile(input: Parameters<typeof upsertProfile>[0]) {
+  if (!isSupabaseConfigured()) return;
+  try {
+    await upsertProfile(input);
+  } catch (e) {
+    console.error("[registerUser] upsertProfile", e);
+  }
+}
+
 async function uploadSpecialistLicense(
   userId: string,
   licenseFile: File
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
-  const supabase = createSupabaseServerClient();
-  const ext = licenseFile.name.split(".").pop()?.toLowerCase() ?? "pdf";
-  const path = `${userId}/license-${Date.now()}.${ext}`;
-  const buffer = Buffer.from(await licenseFile.arrayBuffer());
+  try {
+    const supabase = createSupabaseServerClient();
+    const ext = licenseFile.name.split(".").pop()?.toLowerCase() ?? "pdf";
+    const path = `${userId}/license-${Date.now()}.${ext}`;
+    const buffer = Buffer.from(await licenseFile.arrayBuffer());
 
-  const { error: uploadError } = await supabase.storage
-    .from("licenses")
-    .upload(path, buffer, {
-      contentType: licenseFile.type || "application/octet-stream",
-      upsert: true,
-    });
+    const { error: uploadError } = await supabase.storage
+      .from("licenses")
+      .upload(path, buffer, {
+        contentType: licenseFile.type || "application/octet-stream",
+        upsert: true,
+      });
 
-  if (uploadError) {
-    return { ok: false, error: uploadError.message };
+    if (uploadError) {
+      return { ok: false, error: uploadError.message };
+    }
+
+    const { data: urlData } = supabase.storage.from("licenses").getPublicUrl(path);
+    return { ok: true, url: urlData.publicUrl };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Ошибка загрузки",
+    };
   }
-
-  const { data: urlData } = supabase.storage.from("licenses").getPublicUrl(path);
-  return { ok: true, url: urlData.publicUrl };
 }
 
 export async function registerUser(
@@ -113,9 +135,15 @@ export async function registerUser(
 
   const licenseFile =
     role === "SPECIALIST" ? formData.get("license") : null;
+
   if (role === "SPECIALIST") {
     if (!(licenseFile instanceof File) || licenseFile.size === 0) {
       return { error: "Загрузите файл лицензии" };
+    }
+    if (licenseFile.size > MAX_LICENSE_BYTES) {
+      return {
+        error: "Файл лицензии слишком большой (макс. 4 МБ). На телефоне выберите другое фото или сожмите его.",
+      };
     }
   }
 
@@ -161,10 +189,10 @@ export async function registerUser(
 
     if (role === "SPECIALIST") {
       if (!isSupabaseConfigured()) {
-        redirect("/login?registered=specialist&supabase=pending");
+        return { redirectTo: "/login?registered=specialist&supabase=pending" };
       }
 
-      await upsertProfile({
+      await safeUpsertProfile({
         userId: user.id,
         role,
         fullName: data.displayName,
@@ -178,7 +206,6 @@ export async function registerUser(
         if (uploaded.ok) {
           licenseUrl = uploaded.url;
         }
-        // Если bucket ещё не создан — профиль создаём без URL, лицензию загрузят в кабинете
       }
 
       const reg = await registerSpecialistProfile({
@@ -192,15 +219,18 @@ export async function registerUser(
       });
 
       if (!reg.ok) {
-        await prisma.user.delete({ where: { id: user.id } }).catch(() => {});
-        return { error: reg.error };
+        console.error("[registerUser] specialist profile", reg.error);
+        // Аккаунт уже создан — не удаляем, пусть дозаполнит в кабинете
+        return {
+          redirectTo: "/login?registered=specialist&profile=pending",
+        };
       }
 
-      redirect("/login?registered=specialist");
+      return { redirectTo: "/login?registered=specialist" };
     }
 
     if (isSupabaseConfigured()) {
-      await upsertProfile({
+      await safeUpsertProfile({
         userId: user.id,
         role,
         fullName: data.displayName,
@@ -209,7 +239,6 @@ export async function registerUser(
       });
     }
   } catch (e) {
-    if (e && typeof e === "object" && "digest" in e) throw e;
     if (userId) {
       await prisma.user.delete({ where: { id: userId } }).catch(() => {});
     }
@@ -217,5 +246,5 @@ export async function registerUser(
     return { error: formatRegisterError(e) };
   }
 
-  redirect("/login?registered=1");
+  return { redirectTo: "/login?registered=1" };
 }
