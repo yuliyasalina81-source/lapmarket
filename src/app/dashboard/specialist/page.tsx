@@ -7,9 +7,12 @@ import {
   getSpecialistForOwner,
   getSpecialistServices,
 } from "@/lib/queries/services-supabase";
+import { getProviderBookings } from "@/lib/queries/services";
+import { ensureServiceProviderForUser } from "@/lib/specialist-prisma";
 import { prisma } from "@/lib/prisma";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { SpecialistDashboard } from "@/components/specialist/specialist-dashboard";
+import { SpecialistDashboardPrisma } from "@/components/specialist/specialist-dashboard-prisma";
 
 export const metadata = { title: "Кабинет специалиста — ЛапМаркет" };
 
@@ -21,23 +24,53 @@ export default async function SpecialistDashboardPage() {
     redirect("/profile");
   }
 
-  if (!isSupabaseConfigured()) {
+  const supabaseOk = isSupabaseConfigured();
+
+  if (!supabaseOk) {
+    const provider = await ensureServiceProviderForUser(session.user.id);
+    if (!provider) redirect("/profile");
+
+    const bookings = await getProviderBookings(session.user.id);
+
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <p className="text-stone-600">
-          Настройте Supabase (см. README). Пока используйте{" "}
-          <Link href="/profile/provider-bookings" className="text-emerald-700">
-            записи клиентов
-          </Link>
-          .
-        </p>
+      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+        <Link href="/profile" className="text-sm text-emerald-700 hover:underline">
+          ← Профиль
+        </Link>
+        <h1 className="mt-4 text-2xl font-bold text-stone-900">Кабинет специалиста</h1>
+        <SpecialistDashboardPrisma
+          provider={provider}
+          bookings={bookings}
+          supabaseConfigured={false}
+        />
       </div>
     );
   }
 
   const profile = await getSpecialistForOwner(session.user.id);
+
   if (!profile && session.user.role !== "ADMIN") {
-    redirect("/register?role=specialist");
+    const provider = await ensureServiceProviderForUser(session.user.id);
+    if (provider) {
+      const bookings = await getProviderBookings(session.user.id);
+      return (
+        <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+          <Link href="/profile" className="text-sm text-emerald-700 hover:underline">
+            ← Профиль
+          </Link>
+          <h1 className="mt-4 text-2xl font-bold text-stone-900">Кабинет специалиста</h1>
+          <p className="mt-2 text-sm text-stone-500">
+            Профиль Supabase ещё не создан — работаете в базовом режиме.
+          </p>
+          <SpecialistDashboardPrisma
+            provider={provider}
+            bookings={bookings}
+            supabaseConfigured={true}
+          />
+        </div>
+      );
+    }
+    redirect("/register");
   }
 
   const prismaUser = await prisma.user.findUnique({

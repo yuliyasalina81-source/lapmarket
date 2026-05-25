@@ -8,6 +8,7 @@ import { upsertProfile } from "@/lib/supabase/sync";
 import { createSupabaseServerClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { UserRole } from "@prisma/client";
 import type { SpecialistKind } from "@/lib/supabase/database.types";
+import { specialistKindToPrisma } from "@/lib/specialist-prisma";
 
 export type RegisterState = {
   error?: string;
@@ -189,7 +190,19 @@ export async function registerUser(
 
     if (role === "SPECIALIST") {
       if (!isSupabaseConfigured()) {
-        return { redirectTo: "/login?registered=specialist&supabase=pending" };
+        await prisma.serviceProvider.create({
+          data: {
+            userId: user.id,
+            name: data.displayName,
+            kind: specialistKindToPrisma(data.specialistKind as SpecialistKind),
+            city: city!,
+            address: data.specialistAddress!.trim(),
+            priceFrom: 1000,
+            specialties: ["Приём"],
+            verified: false,
+          },
+        });
+        return { redirectTo: "/login?registered=specialist" };
       }
 
       await safeUpsertProfile({

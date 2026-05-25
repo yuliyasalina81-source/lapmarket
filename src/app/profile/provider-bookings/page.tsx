@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getProviderBookings } from "@/lib/queries/services";
+import { ensureServiceProviderForUser } from "@/lib/specialist-prisma";
 import { ProviderBookingsView } from "@/components/profile/provider-bookings-view";
 
 export const metadata = { title: "Записи клиентов — ЛапМаркет" };
@@ -9,6 +10,10 @@ export const metadata = { title: "Записи клиентов — ЛапМар
 export default async function ProviderBookingsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+
+  if (session.user.role === "SPECIALIST") {
+    await ensureServiceProviderForUser(session.user.id);
+  }
 
   const bookings = await getProviderBookings(session.user.id);
   if (bookings.length === 0) {
