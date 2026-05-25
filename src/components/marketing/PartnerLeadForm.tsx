@@ -17,11 +17,10 @@ export function PartnerLeadForm() {
     const fd = new FormData(form);
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("/api/partner-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          source: "partner",
           name: fd.get("name"),
           clinicName: fd.get("clinicName"),
           phone: fd.get("phone"),
@@ -46,8 +45,9 @@ export function PartnerLeadForm() {
   if (done) {
     return (
       <div className="rounded-2xl bg-emerald-50 px-5 py-6 text-center text-emerald-800">
-        <p className="font-semibold">Заявка отправлена</p>
-        <p className="mt-2 text-sm">Мы свяжемся с вами в течение 24 часов</p>
+        <p className="font-semibold">
+          Заявка отправлена. Мы свяжемся с вами в течение 24 часов.
+        </p>
         <button
           type="button"
           onClick={() => setDone(false)}
