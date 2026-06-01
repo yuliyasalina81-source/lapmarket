@@ -23,7 +23,7 @@ export function InstallBanner() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-40 rounded-2xl border border-emerald-200 bg-white p-4 shadow-lg md:bottom-4 md:left-auto md:right-4 md:max-w-sm">
+    <div className="fixed bottom-32 left-4 right-4 z-40 rounded-2xl border border-emerald-200 bg-white p-4 shadow-lg md:bottom-4 md:left-auto md:right-4 md:max-w-sm">
       <p className="text-sm font-medium text-stone-900">Установите ЛапМаркет</p>
       <p className="mt-1 text-xs text-stone-600">
         Добавьте на главный экран через меню браузера «На экран Домой»

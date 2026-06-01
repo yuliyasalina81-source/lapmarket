@@ -1,4 +1,5 @@
-/** Server Component */
+"use client";
+
 /** Ссылки на Telegram и VK с фирменными иконками */
 
 import { TelegramBrandIcon, VkBrandIcon } from "@/components/icons/brand-icons";
@@ -21,8 +22,8 @@ const items = [
 ] as const;
 
 type SocialLinksProps = {
-  /** Компактный ряд в шапке или блок с подписью в подвале */
-  variant?: "header" | "footer";
+  /** header — шапка; footer — подвал; mobile-menu — бургер-меню; mobile-bar — над нижней панелью */
+  variant?: "header" | "footer" | "mobile-menu" | "mobile-bar";
 };
 
 /**
@@ -51,6 +52,26 @@ export function SocialLinks({ variant = "header" }: SocialLinksProps) {
     return (
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <span className="text-sm font-medium text-stone-700">Мы в соцсетях</span>
+        {links}
+      </div>
+    );
+  }
+
+  if (variant === "mobile-menu") {
+    return (
+      <div className="mt-3 border-t border-stone-100 pt-4">
+        <p className="mb-2 px-4 text-xs font-medium uppercase tracking-wide text-stone-500">
+          Мы в соцсетях
+        </p>
+        <div className="flex items-center gap-2 px-4">{links}</div>
+      </div>
+    );
+  }
+
+  if (variant === "mobile-bar") {
+    return (
+      <div className="flex items-center justify-center gap-4 border-b border-amber-100/90 bg-white/95 px-4 py-2 backdrop-blur-md">
+        <span className="text-xs font-medium text-stone-600">Мы в соцсетях</span>
         {links}
       </div>
     );

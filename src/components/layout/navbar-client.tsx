@@ -127,7 +127,10 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
         </nav>
 
         <div className="flex items-center gap-2">
-          <div className="hidden items-center sm:flex">
+          <div className="hidden items-center md:flex">
+            <SocialLinks variant="header" />
+          </div>
+          <div className="flex items-center md:hidden">
             <SocialLinks variant="header" />
           </div>
           <Link
@@ -329,6 +332,7 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
                   </Link>
                 </div>
               )}
+              <SocialLinks variant="mobile-menu" />
             </div>
           </motion.nav>
         )}
