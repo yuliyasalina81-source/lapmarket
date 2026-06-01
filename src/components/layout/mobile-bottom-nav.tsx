@@ -10,7 +10,6 @@ import { useSession } from "next-auth/react";
 import { mobileNav, type NavItem } from "@/lib/nav";
 import { profileNavHref } from "@/lib/auth-redirect";
 import { filterNavByRole } from "@/lib/coming-soon";
-import { SocialLinks } from "@/components/layout/social-links";
 
 /**
  * Подсвечивает пункт нижнего меню по текущему pathname
@@ -41,12 +40,10 @@ export function MobileBottomNav() {
   const items = [...filterNavByRole(mobileNav, session?.user?.role), profileTab];
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 md:hidden">
-      <SocialLinks variant="mobile-bar" />
-      <nav
-        className="border-t border-amber-100/90 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md"
-        aria-label="Нижняя навигация"
-      >
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-amber-100/90 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      aria-label="Нижняя навигация"
+    >
       <ul className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1">
         {items.map(({ href, label, icon: Icon }) => {
           const active = isActive(pathname, href);
@@ -71,7 +68,6 @@ export function MobileBottomNav() {
           );
         })}
       </ul>
-      </nav>
-    </div>
+    </nav>
   );
 }

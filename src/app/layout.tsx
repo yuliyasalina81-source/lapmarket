@@ -14,6 +14,10 @@ import { InstallBanner } from "@/components/pwa/install-banner";
 import { MobileFallback } from "@/components/pwa/mobile-fallback";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { ContactChatWidget } from "@/components/marketing/ContactChatWidget";
+import {
+  SocialLinksStatic,
+  SocialMobileBar,
+} from "@/components/layout/social-links-static";
 import "./globals.css";
 
 const inter = Inter({
@@ -59,9 +63,18 @@ export default async function RootLayout({
                   <NavbarNotifications />
                 </Suspense>
               }
+              headerSocial={
+                <div className="flex shrink-0 items-center">
+                  <SocialLinksStatic />
+                </div>
+              }
+              menuSocial={<SocialLinksStatic variant="mobile-menu" />}
             />
-            <main className="flex-1 pb-32 md:pb-0">{children}</main>
+            <main className="flex-1 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+              {children}
+            </main>
             <Footer />
+            <SocialMobileBar />
             <MobileBottomNav />
             <ContactChatWidget />
             <AppToaster />

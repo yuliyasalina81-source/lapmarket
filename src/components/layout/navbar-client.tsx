@@ -22,7 +22,6 @@ import { isImageUrl } from "@/lib/constants";
 import { profileNavHref } from "@/lib/auth-redirect";
 import { filterNavByRole } from "@/lib/coming-soon";
 import { desktopNav } from "@/lib/nav";
-import { SocialLinks } from "@/components/layout/social-links";
 
 const extraNav = [
   { href: "/for-business", label: "Для бизнеса" },
@@ -31,12 +30,20 @@ const extraNav = [
 
 type NavbarClientProps = {
   notifications?: ReactNode;
+  /** SSR-иконки соцсетей в шапке (передаётся из layout) */
+  headerSocial?: ReactNode;
+  /** SSR-блок соцсетей в бургер-меню */
+  menuSocial?: ReactNode;
 };
 
 /**
  * Шапка с логотипом, ссылками и выпадающим профилем
  */
-export function NavbarClient({ notifications }: NavbarClientProps) {
+export function NavbarClient({
+  notifications,
+  headerSocial,
+  menuSocial,
+}: NavbarClientProps) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -126,13 +133,8 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <div className="hidden items-center md:flex">
-            <SocialLinks variant="header" />
-          </div>
-          <div className="flex items-center md:hidden">
-            <SocialLinks variant="header" />
-          </div>
+        <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
+          {headerSocial}
           <Link
             href="/search"
             className="hidden rounded-xl px-3 py-2 text-sm font-medium text-stone-600 hover:bg-emerald-50 sm:block"
@@ -332,7 +334,7 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
                   </Link>
                 </div>
               )}
-              <SocialLinks variant="mobile-menu" />
+              {menuSocial}
             </div>
           </motion.nav>
         )}
