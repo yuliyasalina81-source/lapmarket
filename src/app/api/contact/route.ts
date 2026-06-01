@@ -70,8 +70,12 @@ function firstZodError(flat: {
 }
 
 export async function POST(req: Request) {
-  console.log("[contact] API started");
   try {
+    console.log("[contact] 1. START");
+
+    const body: unknown = await req.json();
+    console.log("[contact] 2. BODY", body);
+
     const ip = getClientIp(req);
     const rate = checkRateLimit(`contact:${ip}`, RATE_LIMIT, RATE_WINDOW_MS);
     if (!rate.allowed) {
@@ -87,8 +91,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const json: unknown = await req.json();
-    const parsed = contactRequestSchema.safeParse(json);
+    const parsed = contactRequestSchema.safeParse(body);
     if (!parsed.success) {
       const flat = parsed.error.flatten();
       return NextResponse.json(
@@ -98,18 +101,13 @@ export async function POST(req: Request) {
     }
 
     const data = parsed.data;
-    console.log("[contact] body parsed", {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-    });
 
     if (data.company?.trim()) {
       return NextResponse.json({ ok: true });
     }
 
-    console.log("[contact] calling sendEmail");
-    const emailResult = await sendEmail({
+    console.log("[contact] 3. BEFORE SEND");
+    const result = await sendEmail({
       to: getContactEmail(),
       subject: "Новая заявка с сайта",
       html: buildContactEmailHtml({
@@ -123,20 +121,20 @@ export async function POST(req: Request) {
       }),
       replyTo: data.email,
     });
-    console.log("[contact] sendEmail result", emailResult);
+    console.log("[contact] 4. RESULT", result);
 
-    if (!emailResult.ok) {
+    if (!result.ok) {
       return NextResponse.json(
-        { ok: false, error: emailResult.error ?? "Не удалось отправить письмо" },
+        { ok: false, error: result.error ?? "Не удалось отправить письмо" },
         { status: 502 }
       );
     }
 
     return NextResponse.json({ ok: true });
-  } catch (e) {
-    console.error("[contact]", e);
+  } catch (error) {
+    console.error("[contact] CATCH ERROR:", error);
     return NextResponse.json(
-      { ok: false, error: "Не удалось отправить заявку" },
+      { ok: false, error: String(error) },
       { status: 500 }
     );
   }
