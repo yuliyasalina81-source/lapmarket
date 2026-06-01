@@ -9,6 +9,7 @@ import { User } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { mobileNav, type NavItem } from "@/lib/nav";
 import { profileNavHref } from "@/lib/auth-redirect";
+import { filterNavByRole } from "@/lib/coming-soon";
 
 /**
  * Подсвечивает пункт нижнего меню по текущему pathname
@@ -26,7 +27,7 @@ function isActive(pathname: string, href: string): boolean {
  */
 export function MobileBottomNav() {
   const pathname = usePathname();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
 
   const profileHref = profileNavHref(status === "authenticated");
 
@@ -36,7 +37,7 @@ export function MobileBottomNav() {
     icon: User,
   };
 
-  const items = [...mobileNav, profileTab];
+  const items = [...filterNavByRole(mobileNav, session?.user?.role), profileTab];
 
   return (
     <nav

@@ -20,16 +20,13 @@ import { useSession, signOut } from "next-auth/react";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { isImageUrl } from "@/lib/constants";
 import { profileNavHref } from "@/lib/auth-redirect";
+import { filterNavByRole } from "@/lib/coming-soon";
+import { desktopNav } from "@/lib/nav";
 
-const nav = [
-  { href: "/pets", label: "Паспорт" },
-  { href: "/feed", label: "Лента" },
-  { href: "/market", label: "Товары" },
-  { href: "/animals", label: "Объявления" },
-  { href: "/services", label: "Услуги" },
+const extraNav = [
   { href: "/for-business", label: "Для бизнеса" },
   { href: "/profile", label: "Профиль" },
-];
+] as const;
 
 type NavbarClientProps = {
   notifications?: ReactNode;
@@ -48,6 +45,16 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
   const user = session?.user;
   const isLoggedIn = status === "authenticated" && !!user;
   const profileHref = profileNavHref(isLoggedIn);
+  const role = user?.role;
+
+  const nav = [
+    ...filterNavByRole(
+      desktopNav.map(({ href, label }) => ({ href, label })),
+      role
+    ),
+    ...extraNav,
+  ];
+
   const menuNav = isLoggedIn
     ? nav
     : nav.filter((item) => item.href !== "/profile");

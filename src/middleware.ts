@@ -5,6 +5,10 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  canBypassComingSoon,
+  isComingSoonPath,
+} from "@/lib/coming-soon";
 
 /** Префиксы URL, требующие авторизации. */
 const protectedPrefixes = [
@@ -38,20 +42,27 @@ export async function middleware(req: NextRequest) {
   const pathname = nextUrl.pathname;
 
   const secret = getAuthSecret();
-  // Без секрета JWT не проверяется — пропускаем запрос
-  if (!secret) {
-    return NextResponse.next();
-  }
-
   const secureCookie = nextUrl.protocol === "https:";
-  const token = await getToken({
-    req,
-    secret,
-    secureCookie,
-  });
+  const token = secret
+    ? await getToken({
+        req,
+        secret,
+        secureCookie,
+      })
+    : null;
 
   const isLoggedIn = !!token;
   const role = token?.role as string | undefined;
+
+  if (isComingSoonPath(pathname) && !canBypassComingSoon(role)) {
+    const rewriteUrl = nextUrl.clone();
+    rewriteUrl.pathname = "/coming-soon";
+    return NextResponse.rewrite(rewriteUrl);
+  }
+
+  if (!secret) {
+    return NextResponse.next();
+  }
 
   const isProtected = protectedPrefixes.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
@@ -108,6 +119,12 @@ export async function middleware(req: NextRequest) {
 /** Маршруты, на которых срабатывает middleware. */
 export const config = {
   matcher: [
+    "/animals",
+    "/animals/:path*",
+    "/market",
+    "/market/:path*",
+    "/listings/new",
+    "/coming-soon",
     "/profile",
     "/profile/:path*",
     "/dashboard/:path*",

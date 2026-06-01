@@ -31,8 +31,10 @@ export function ContactChatWidget() {
 
     const form = e.currentTarget;
     const fd = new FormData(form);
-    const email = (fd.get("email") as string)?.trim();
-    const phone = (fd.get("phone") as string)?.trim();
+    const name = String(fd.get("name") ?? "").trim();
+    const email = String(fd.get("email") ?? "").trim();
+    const phone = String(fd.get("phone") ?? "").trim();
+    const message = String(fd.get("message") ?? "").trim();
 
     if (!email && !phone) {
       setError("Укажите email или телефон");
@@ -40,18 +42,22 @@ export function ContactChatWidget() {
       return;
     }
 
+    const payload: Record<string, string> = {
+      source: "chat",
+      name,
+    };
+    if (email) payload.email = email;
+    if (phone) payload.phone = phone;
+    if (message) payload.message = message;
+    // Checkbox honeypot: у людей не отмечен → в FormData нет поля
+    const hp = fd.get("_hp");
+    if (hp === "1") payload._hp = "1";
+
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          source: "chat",
-          name: fd.get("name"),
-          email: email || undefined,
-          phone: phone || undefined,
-          message: fd.get("message"),
-          company: fd.get("company"),
-        }),
+        body: JSON.stringify(payload),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok || !data.ok) {
@@ -85,20 +91,17 @@ export function ContactChatWidget() {
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Honeypot — скрыто от людей, боты часто заполняют */}
-            <div
-              className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
-              aria-hidden
-            >
-              <label htmlFor="chat-company">Компания</label>
+            {/* Honeypot: checkbox — autofill не отмечает; боты часто отмечают все поля */}
+            <label className="sr-only" aria-hidden>
               <input
-                id="chat-company"
-                name="company"
-                type="text"
+                type="checkbox"
+                name="_hp"
+                value="1"
                 tabIndex={-1}
-                autoComplete="off"
+                className="pointer-events-none absolute h-0 w-0 opacity-0"
               />
-            </div>
+              Не отмечайте
+            </label>
 
             <div>
               <label htmlFor="chat-name" className="mb-1.5 block text-sm font-medium text-stone-700">
@@ -108,6 +111,7 @@ export function ContactChatWidget() {
                 id="chat-name"
                 name="name"
                 required
+                minLength={2}
                 autoComplete="name"
                 className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-base outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 md:text-sm"
               />

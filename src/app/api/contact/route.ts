@@ -102,7 +102,8 @@ export async function POST(req: Request) {
 
     const data = parsed.data;
 
-    if (data.company?.trim()) {
+    if (data._hp) {
+      console.log("[contact] honeypot triggered, skip email", { _hp: data._hp });
       return NextResponse.json({ ok: true });
     }
 

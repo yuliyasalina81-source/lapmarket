@@ -23,8 +23,8 @@ export const contactRequestSchema = z
       .optional()
       .transform((v) => (v?.trim() ? v.trim() : undefined)),
     source: z.enum(["chat", "partner"]).optional().default("chat"),
-    /** Honeypot — должно оставаться пустым */
-    company: z.string().optional(),
+    /** Honeypot (checkbox) — не должен приходить от реальных пользователей */
+    _hp: z.union([z.string(), z.number(), z.boolean()]).optional(),
     clinicName: optionalTrimmed,
     city: optionalTrimmed,
   })

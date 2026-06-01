@@ -27,6 +27,15 @@ export const appNav: NavItem[] = [
   { href: "/services", label: "Услуги", icon: Stethoscope },
 ];
 
+/** Десктопное меню (подписи в шапке). */
+export const desktopNav: NavItem[] = [
+  { href: "/pets", label: "Паспорт", icon: Syringe },
+  { href: "/feed", label: "Лента", icon: Newspaper },
+  { href: "/market", label: "Товары", icon: ShoppingBag },
+  { href: "/animals", label: "Объявления", icon: PawPrint },
+  { href: "/services", label: "Услуги", icon: Stethoscope },
+];
+
 /** Вкладки нижней панели на мобильных. */
 export const mobileNav: NavItem[] = [
   { href: "/", label: "Главная", icon: Home },
