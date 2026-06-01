@@ -70,6 +70,7 @@ function firstZodError(flat: {
 }
 
 export async function POST(req: Request) {
+  console.log("[contact] API started");
   try {
     const ip = getClientIp(req);
     const rate = checkRateLimit(`contact:${ip}`, RATE_LIMIT, RATE_WINDOW_MS);
@@ -97,11 +98,17 @@ export async function POST(req: Request) {
     }
 
     const data = parsed.data;
+    console.log("[contact] body parsed", {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+    });
 
     if (data.company?.trim()) {
       return NextResponse.json({ ok: true });
     }
 
+    console.log("[contact] calling sendEmail");
     const emailResult = await sendEmail({
       to: getContactEmail(),
       subject: "Новая заявка с сайта",
@@ -116,6 +123,7 @@ export async function POST(req: Request) {
       }),
       replyTo: data.email,
     });
+    console.log("[contact] sendEmail result", emailResult);
 
     if (!emailResult.ok) {
       return NextResponse.json(

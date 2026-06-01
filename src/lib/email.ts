@@ -30,6 +30,9 @@ export async function sendEmail(params: {
   html: string;
   replyTo?: string;
 }): Promise<SendEmailResult> {
+  console.log("[email] sendEmail called, to:", params.to);
+  console.log("[email] has key:", !!getResendApiKey());
+
   const resend = getResend();
 
   if (!resend) {
