@@ -1,11 +1,11 @@
 /** POST /api/contact — заявка с виджета «Связаться с нами», письмо через Resend */
 import { NextResponse } from "next/server";
+import { getContactEmail } from "@/lib/env";
 import { sendEmail } from "@/lib/email";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { contactRequestSchema } from "@/lib/validations/contact";
 
-const CONTACT_TO =
-  process.env.CONTACT_EMAIL?.trim() || "yaroslav937148@gmail.com";
+export const runtime = "nodejs";
 
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 15 * 60 * 1000;
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
     }
 
     const emailResult = await sendEmail({
-      to: CONTACT_TO,
+      to: getContactEmail(),
       subject: "Новая заявка с сайта",
       html: buildContactEmailHtml({
         name: data.name,

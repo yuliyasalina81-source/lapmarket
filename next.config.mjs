@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ["resend"],
   experimental: {
     serverActions: {
       bodySizeLimit: "5mb",

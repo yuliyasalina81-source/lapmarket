@@ -1,6 +1,9 @@
 /** POST /api/partner-request — заявка партнёра (клиника) с /for-business, письмо через Resend */
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { getEmailFrom, getResendApiKey } from "@/lib/env";
+
+export const runtime = "nodejs";
 
 type PartnerRequestBody = {
   name?: string;
@@ -37,8 +40,8 @@ function buildPartnerEmailHtml(fields: Record<string, string>) {
 
 export async function POST(req: Request) {
   try {
-    const apiKey = process.env.RESEND_API_KEY?.trim();
-    const notifyEmail = process.env.PARTNER_NOTIFY_EMAIL?.trim();
+    const apiKey = getResendApiKey();
+    const notifyEmail = process.env["PARTNER_NOTIFY_EMAIL"]?.trim();
 
     if (!apiKey || !notifyEmail) {
       console.error(
@@ -68,8 +71,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const from =
-      process.env.EMAIL_FROM?.trim() || "LapMarket <onboarding@resend.dev>";
+    const from = getEmailFrom();
     const resend = new Resend(apiKey);
 
     const { error } = await resend.emails.send({
