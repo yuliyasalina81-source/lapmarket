@@ -1,3 +1,6 @@
+/** Server Component */
+/** Бейджи и иконки статуса объявления о животном */
+
 import { BadgeCheck, Heart, FileText } from "lucide-react";
 import type { AnimalBadge as BadgeEnum } from "@prisma/client";
 
@@ -17,6 +20,9 @@ const config: Record<
   },
 };
 
+/**
+ * Бейдж «С галочкой» или «С сердечком» для объявления
+ */
 export function AnimalBadge({ type }: { type: BadgeEnum }) {
   const { label, icon: Icon, className } = config[type];
   return (
@@ -29,6 +35,9 @@ export function AnimalBadge({ type }: { type: BadgeEnum }) {
   );
 }
 
+/**
+ * Иконка наличия паспорта питомца в объявлении
+ */
 export function PassportIcon() {
   return (
     <span

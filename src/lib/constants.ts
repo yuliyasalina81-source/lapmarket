@@ -1,9 +1,14 @@
+/**
+ * Константы приложения: подписи категорий товаров и услуг,
+ * виды животных, демо-URL изображений и вспомогательные проверки.
+ */
 import type {
   AnimalKind,
   ProductCategory,
   ServiceKind,
 } from "@prisma/client";
 
+/** Человекочитаемые названия категорий товаров. */
 export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   FOOD: "Корм",
   TOYS: "Игрушки",
@@ -11,10 +16,12 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   PHARMACY: "Аптека",
 };
 
+/** Список всех категорий товаров для селектов и фильтров. */
 export const PRODUCT_CATEGORIES = Object.keys(
   PRODUCT_CATEGORY_LABELS
 ) as ProductCategory[];
 
+/** Подписи видов животных в объявлениях и паспорте. */
 export const ANIMAL_KIND_LABELS: Record<AnimalKind, string> = {
   DOG: "Собака",
   CAT: "Кошка",
@@ -23,6 +30,7 @@ export const ANIMAL_KIND_LABELS: Record<AnimalKind, string> = {
   OTHER: "Другое",
 };
 
+/** Подписи типов услуг специалистов. */
 export const SERVICE_KIND_LABELS: Record<ServiceKind, string> = {
   VETERINARY: "Ветеринария",
   GROOMING: "Груминг",
@@ -31,6 +39,7 @@ export const SERVICE_KIND_LABELS: Record<ServiceKind, string> = {
   OTHER: "Другое",
 };
 
+/** URL демо-изображений (Unsplash) для сидов и заглушек. */
 export const DEMO_IMAGE_URLS = {
   dog: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80",
   cat: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800&q=80",
@@ -43,6 +52,11 @@ export const DEMO_IMAGE_URLS = {
   post2: "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=800&q=80",
 } as const;
 
+/**
+ * Проверяет, что строка похожа на абсолютный URL изображения.
+ * @param value Строка для проверки
+ * @returns true, если начинается с http:// или https://
+ */
 export function isImageUrl(value: string): boolean {
   return value.startsWith("http://") || value.startsWith("https://");
 }

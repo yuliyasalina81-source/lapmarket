@@ -1,10 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Регистрация service worker */
+
 import { useEffect } from "react";
 
-/** Clears broken cache-first SW (lapmarket-v1) once per browser. */
 const RECOVERY_KEY = "lapmarket-sw-recovery-v2";
 
+/**
+ * Однократно снимает устаревший SW и очищает кэш lapmarket-v1
+ */
 async function clearLegacyServiceWorker(): Promise<boolean> {
   if (!("serviceWorker" in navigator)) return false;
 
@@ -31,6 +36,9 @@ async function clearLegacyServiceWorker(): Promise<boolean> {
   }
 }
 
+/**
+ * Подключение SW для офлайн и кэша
+ */
 export function ServiceWorkerRegister() {
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;

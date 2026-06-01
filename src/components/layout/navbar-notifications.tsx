@@ -1,7 +1,13 @@
+/** Server Component */
+/** Серверная загрузка уведомлений для колокольчика в шапке */
+
 import { auth } from "@/lib/auth";
 import { getNotifications, getUnreadCount } from "@/lib/notifications";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 
+/**
+ * Async-обёртка NotificationBell с данными сессии
+ */
 export async function NavbarNotifications() {
   try {
     const session = await auth();

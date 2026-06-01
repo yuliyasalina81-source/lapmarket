@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Модальное окно с оверлеем */
+
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
@@ -12,6 +15,9 @@ interface ModalProps {
   size?: "sm" | "md" | "lg";
 }
 
+/**
+ * Диалоговое окно с заголовком и закрытием
+ */
 export function Modal({
   open,
   onClose,

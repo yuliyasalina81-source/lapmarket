@@ -1,11 +1,17 @@
 "use client";
 
+/** Client Component */
+/** Кнопка открытия корзины с счётчиком */
+
 import { useState, useTransition } from "react";
 import { ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { addToCart, cartCount, CART_KEY, getCart } from "@/lib/cart";
 import { createOrderRequest } from "@/actions/orders";
 
+/**
+ * Кнопка корзины с количеством позиций
+ */
 export function CartButton({
   sellerId,
   productId,

@@ -1,3 +1,5 @@
+/** Server Component */
+/** /profile/inbox/[id] — переписка в одном диалоге */
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

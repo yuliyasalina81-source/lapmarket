@@ -1,3 +1,4 @@
+/** Server Actions для паролей */
 "use server";
 
 import { randomBytes } from "crypto";
@@ -7,10 +8,16 @@ import { sendEmail } from "@/lib/email";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Отправляет письмо со ссылкой сброса пароля (без раскрытия наличия email).
+ * @param email — адрес почты
+ * @returns ActionResult
+ */
 export async function requestPasswordReset(email: string): Promise<ActionResult> {
   try {
     const normalized = email.trim().toLowerCase();
     const user = await prisma.user.findUnique({ where: { email: normalized } });
+    // Не раскрываем, есть ли пользователь
     if (!user?.email) return { ok: true };
 
     const token = randomBytes(32).toString("hex");
@@ -38,6 +45,13 @@ export async function requestPasswordReset(email: string): Promise<ActionResult>
   }
 }
 
+/**
+ * Устанавливает новый пароль по токену из письма.
+ * @param email — email из ссылки
+ * @param token — токен verificationToken
+ * @param newPassword — новый пароль (мин. 8 символов)
+ * @returns ActionResult
+ */
 export async function resetPassword(
   email: string,
   token: string,
@@ -70,6 +84,12 @@ export async function resetPassword(
   }
 }
 
+/**
+ * Меняет пароль авторизованного пользователя.
+ * @param currentPassword — текущий пароль
+ * @param newPassword — новый пароль (мин. 8 символов)
+ * @returns ActionResult
+ */
 export async function changePassword(
   currentPassword: string,
   newPassword: string

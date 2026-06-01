@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Галерея фото питомца */
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
@@ -14,6 +17,9 @@ type GalleryItem = {
   media: { url: string };
 };
 
+/**
+ * Сетка фотографий с lightbox
+ */
 export function PetGallery({
   petId,
   items,

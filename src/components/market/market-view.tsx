@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Каталог товаров с фильтрами и корзиной */
+
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -14,6 +17,9 @@ type ProductItem = Awaited<ReturnType<typeof getPublishedProducts>>[number];
 
 type SellerOption = { id: string; displayName: string };
 
+/**
+ * Страница маркетплейса со списком товаров
+ */
 export function MarketView({
   products,
   sellers,
@@ -153,6 +159,9 @@ export function MarketView({
   );
 }
 
+/**
+ * Переключатель фильтра категории товаров
+ */
 function FilterPill({
   active,
   onClick,

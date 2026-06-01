@@ -1,10 +1,16 @@
 "use client";
 
+/** Client Component */
+/** Отмена записи клиентом */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cancelBooking } from "@/actions/services";
 
+/**
+ * Кнопка отмены бронирования с подтверждением
+ */
 export function CancelBookingButton({ bookingId }: { bookingId: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();

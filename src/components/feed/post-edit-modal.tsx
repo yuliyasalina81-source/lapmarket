@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Редактирование поста в ленте */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -8,6 +11,9 @@ import { Modal } from "@/components/ui/modal";
 import { ImageUpload } from "@/components/ui/image-upload";
 import type { FeedPostData } from "@/lib/queries/posts";
 
+/**
+ * Модалка изменения текста и медиа поста
+ */
 export function PostEditModal({
   post,
   pets,

@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Главная админ-панель модерации */
+
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
@@ -37,6 +40,9 @@ type Tab =
   | "services"
   | "specialists";
 
+/**
+ * Дашборд администратора: пользователи, жалобы, статистика
+ */
 export function AdminPanel({
   certifications,
   listings,
@@ -362,6 +368,9 @@ export function AdminPanel({
   );
 }
 
+/**
+ * Список элементов админки с текстом при пустом результате
+ */
 function AdminList({
   children,
   empty,
@@ -380,6 +389,9 @@ function AdminList({
   );
 }
 
+/**
+ * Кнопка действия в админ-панели с состоянием загрузки
+ */
 function AdminBtn({
   children,
   onClick,

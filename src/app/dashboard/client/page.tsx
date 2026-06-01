@@ -1,3 +1,5 @@
+/** Server Component */
+/** /dashboard/client — записи клиента к ветеринарам и грумерам */
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";

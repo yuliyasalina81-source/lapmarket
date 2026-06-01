@@ -1,7 +1,13 @@
 "use client";
 
+/** Client Component */
+/** Скелетон загрузки для сеток карточек */
+
 import { motion } from "framer-motion";
 
+/**
+ * Сетка плейсхолдеров при загрузке данных
+ */
 export function SkeletonGrid({ count = 4 }: { count?: number }) {
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

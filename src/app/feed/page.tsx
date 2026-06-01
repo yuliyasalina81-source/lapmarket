@@ -1,3 +1,5 @@
+/** Server Component */
+/** /feed — лента постов владельцев питомцев */
 import { auth } from "@/lib/auth";
 import { getFeedPosts } from "@/lib/queries/posts";
 import { getUserPets } from "@/lib/queries/pets";

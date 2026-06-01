@@ -1,3 +1,4 @@
+/** Server Actions для объявлений о животных */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -8,6 +9,11 @@ import type { AnimalBadge, AnimalKind, ContactRequestStatus } from "@prisma/clie
 
 export type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
 
+/**
+ * Создаёт объявление о животном (SELLER или SHELTER).
+ * @param formData — поля карточки и mediaIds
+ * @returns ActionResult с id объявления
+ */
 export async function createListing(formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -25,6 +31,7 @@ export async function createListing(formData: FormData): Promise<ActionResult> {
     const price = priceRaw ? parseInt(priceRaw, 10) : undefined;
     const badges = formData.getAll("badges") as AnimalBadge[];
 
+    // Обязательные поля и хотя бы один badge
     if (!name || !age || !city || !description || badges.length === 0) {
       return { ok: false, error: "Заполните все обязательные поля" };
     }
@@ -71,6 +78,12 @@ export async function createListing(formData: FormData): Promise<ActionResult> {
   }
 }
 
+/**
+ * Отправляет первичный запрос по объявлению автору.
+ * @param listingId — идентификатор AnimalListing
+ * @param message — текст сообщения
+ * @returns ActionResult
+ */
 export async function createContactRequest(
   listingId: string,
   message: string
@@ -104,6 +117,12 @@ export async function createContactRequest(
   }
 }
 
+/**
+ * Меняет статус входящего контакта (только автор объявления).
+ * @param id — идентификатор ContactRequest
+ * @param status — ContactRequestStatus
+ * @returns ActionResult
+ */
 export async function updateContactStatus(
   id: string,
   status: ContactRequestStatus
@@ -126,6 +145,12 @@ export async function updateContactStatus(
   }
 }
 
+/**
+ * Публикует или отклоняет объявление (модерация ADMIN).
+ * @param id — идентификатор объявления
+ * @param action — publish или reject
+ * @returns ActionResult
+ */
 export async function moderateListing(
   id: string,
   action: "publish" | "reject"

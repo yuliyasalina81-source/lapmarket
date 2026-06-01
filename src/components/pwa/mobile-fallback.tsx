@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Заглушка для неподдерживаемых мобильных функций */
+
 import { useEffect, useState } from "react";
 
 /**

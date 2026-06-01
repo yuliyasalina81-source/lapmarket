@@ -1,6 +1,7 @@
+/** Server Component */
+/** /specialist/[id] — алиас: редирект на /services/[id] */
 import { redirect } from "next/navigation";
 
-/** Alias for /services/[id] */
 export default async function SpecialistAliasPage({
   params,
 }: {

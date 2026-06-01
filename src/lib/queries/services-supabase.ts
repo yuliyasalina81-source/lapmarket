@@ -1,3 +1,6 @@
+/**
+ * Каталог специалистов и записи через Supabase с fallback на Prisma.
+ */
 import type { ServiceKind } from "@prisma/client";
 import {
   type CatalogSpecialist,
@@ -33,6 +36,13 @@ type ProfileRow = {
   avatar_url: string | null;
 };
 
+/**
+ * Собирает CatalogSpecialist из строк Supabase и связанных данных.
+ * @param sp Строка specialist_profiles
+ * @param profile Профиль пользователя или undefined
+ * @param services Список услуг специалиста
+ * @returns Объект для UI каталога
+ */
 function mapToCatalog(
   sp: SpecialistRow,
   profile: ProfileRow | undefined,
@@ -57,6 +67,11 @@ function mapToCatalog(
   };
 }
 
+/**
+ * Загружает услуги для набора specialist_id и группирует по id.
+ * @param ids Массив id специалистов
+ * @returns Map specialist_id → services[]
+ */
 async function fetchServicesBySpecialistIds(ids: string[]) {
   if (ids.length === 0) return new Map<string, CatalogSpecialist["services"]>();
   const supabase = createSupabaseServerClient();
@@ -80,6 +95,11 @@ async function fetchServicesBySpecialistIds(ids: string[]) {
   return map;
 }
 
+/**
+ * Загружает profiles по списку user_id.
+ * @param userIds Идентификаторы пользователей
+ * @returns Map user_id → ProfileRow
+ */
 async function fetchProfiles(userIds: string[]) {
   if (userIds.length === 0) return new Map<string, ProfileRow>();
   const supabase = createSupabaseServerClient();
@@ -91,9 +111,15 @@ async function fetchProfiles(userIds: string[]) {
   return new Map((data ?? []).map((p) => [p.user_id, p as ProfileRow]));
 }
 
+/**
+ * Список одобренных специалистов с фильтрами (Supabase или Prisma fallback).
+ * @param filters kind, city, priceMin, priceMax
+ * @returns Массив CatalogSpecialist
+ */
 export async function getApprovedSpecialists(
   filters: SpecialistFilters = {}
 ): Promise<CatalogSpecialist[]> {
+  // Fallback на Prisma, если Supabase не настроен
   if (!isSupabaseConfigured()) {
     const prismaRows = await getServiceProviders(filters.kind, filters.city);
     return prismaRows.map((p) => ({
@@ -155,6 +181,11 @@ export async function getApprovedSpecialists(
   return result;
 }
 
+/**
+ * Карточка специалиста по id (только approved в Supabase).
+ * @param id id specialist_profiles или ServiceProvider
+ * @returns CatalogSpecialist или null
+ */
 export async function getSpecialistById(
   id: string
 ): Promise<CatalogSpecialist | null> {
@@ -188,6 +219,7 @@ export async function getSpecialistById(
 
   if (error || !data) return null;
   const sp = data as SpecialistRow;
+  // Не одобрен — не показываем в каталоге
   if (sp.verification_status !== "approved") return null;
 
   const profilesMap = await fetchProfiles([sp.user_id]);
@@ -199,6 +231,10 @@ export async function getSpecialistById(
   );
 }
 
+/**
+ * Профиль специалиста владельца (сырая строка Supabase).
+ * @param userId user_id
+ */
 export async function getSpecialistForOwner(userId: string) {
   if (!isSupabaseConfigured()) return null;
   const supabase = createSupabaseServerClient();
@@ -210,6 +246,10 @@ export async function getSpecialistForOwner(userId: string) {
   return data;
 }
 
+/**
+ * Услуги специалиста из таблицы services.
+ * @param specialistId id specialist_profiles
+ */
 export async function getSpecialistServices(specialistId: string) {
   if (!isSupabaseConfigured()) return [];
   const supabase = createSupabaseServerClient();
@@ -221,6 +261,10 @@ export async function getSpecialistServices(specialistId: string) {
   return data ?? [];
 }
 
+/**
+ * Записи клиента с именем специалиста.
+ * @param clientId client_id в appointments
+ */
 export async function getClientAppointments(clientId: string) {
   if (!isSupabaseConfigured()) return [];
   const supabase = createSupabaseServerClient();
@@ -249,6 +293,10 @@ export async function getClientAppointments(clientId: string) {
   });
 }
 
+/**
+ * Записи у специалиста с именами клиентов.
+ * @param specialistId id specialist_profiles
+ */
 export async function getSpecialistAppointments(specialistId: string) {
   if (!isSupabaseConfigured()) return [];
   const supabase = createSupabaseServerClient();
@@ -269,6 +317,10 @@ export async function getSpecialistAppointments(specialistId: string) {
   }));
 }
 
+/**
+ * Правила доступности для генерации слотов.
+ * @param specialistId id specialist_profiles
+ */
 export async function getAvailabilityRules(specialistId: string) {
   if (!isSupabaseConfigured()) return [];
   const supabase = createSupabaseServerClient();
@@ -279,6 +331,12 @@ export async function getAvailabilityRules(specialistId: string) {
   return data ?? [];
 }
 
+/**
+ * Занятые слоты за день (кроме cancelled).
+ * @param specialistId id специалиста
+ * @param dayStart Начало интервала ISO
+ * @param dayEnd Конец интервала ISO
+ */
 export async function getBookedSlots(
   specialistId: string,
   dayStart: string,
@@ -296,6 +354,10 @@ export async function getBookedSlots(
   return data ?? [];
 }
 
+/**
+ * Список специалистов для админ-модерации.
+ * @param status Опциональный verification_status
+ */
 export async function getAdminSpecialists(status?: string) {
   if (!isSupabaseConfigured()) return [];
   const supabase = createSupabaseServerClient();

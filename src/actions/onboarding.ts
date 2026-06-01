@@ -1,3 +1,4 @@
+/** Server Actions для онбординга владельца */
 "use server";
 
 import { redirect } from "next/navigation";
@@ -10,9 +11,15 @@ import { createReminder } from "@/actions/reminders";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Завершает онбординг: создаёт питомца, опционально прививку и напоминание.
+ * @param formData — данные питомца и опциональные vaccName, reminderTitle
+ * @returns ActionResult; при успехе выполняет redirect на карточку питомца
+ */
 export async function completeOnboarding(formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
+    // Не-владельцы просто помечаются onboardingDone
     if (user.role !== "OWNER") {
       await prisma.user.update({
         where: { id: user.id },
@@ -22,6 +29,7 @@ export async function completeOnboarding(formData: FormData): Promise<ActionResu
     }
 
     const petResult = await createPet(formData);
+    // Проброс ошибки создания питомца
     if (!petResult.ok || !petResult.id) {
       return petResult;
     }
@@ -53,6 +61,7 @@ export async function completeOnboarding(formData: FormData): Promise<ActionResu
     revalidatePath("/profile");
     redirect(`/pets/${petResult.id}`);
   } catch (e) {
+    // redirect() бросает NEXT_REDIRECT — пробрасываем
     if (e instanceof Error && e.message === "NEXT_REDIRECT") throw e;
     return { ok: false, error: "Ошибка onboarding" };
   }

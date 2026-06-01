@@ -1,3 +1,5 @@
+/** Server Component */
+/** /reset-password — новый пароль по token и email из query после письма */
 import Link from "next/link";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 

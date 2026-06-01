@@ -1,3 +1,6 @@
+/** Server Component */
+/** Базовая кнопка с вариантами стилей */
+
 import { forwardRef } from "react";
 
 const variants = {
@@ -10,6 +13,9 @@ const variants = {
 
 type Variant = keyof typeof variants;
 
+/**
+ * Универсальная кнопка primary/secondary/ghost
+ */
 export const Button = forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }

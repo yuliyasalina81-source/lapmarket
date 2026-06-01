@@ -1,3 +1,5 @@
+/** Server Component */
+/** /services/[id] — профиль специалиста и форма записи */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";

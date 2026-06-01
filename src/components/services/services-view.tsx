@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Каталог услуг: список, карта, фильтры */
+
 import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -15,6 +18,9 @@ import { Modal } from "@/components/ui/modal";
 import { SlotPicker } from "./slot-picker";
 import { PromoBanner } from "@/components/marketing/PromoBanner";
 
+/**
+ * Обёртка каталога услуг с картой и списком
+ */
 export function ServicesView({
   providers,
   isLoggedIn,
@@ -293,6 +299,9 @@ export function ServicesView({
   );
 }
 
+/**
+ * Переключатель фильтра категории услуг
+ */
 function FilterPill({
   active,
   onClick,

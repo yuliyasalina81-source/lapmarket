@@ -1,3 +1,5 @@
+/** Server Component */
+/** /pets/[id] — цифровой паспорт питомца (прививки, напоминания) */
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getPetById } from "@/lib/queries/pets";

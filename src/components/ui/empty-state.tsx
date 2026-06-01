@@ -1,6 +1,12 @@
+/** Server Component */
+/** Пустое состояние списков и страниц */
+
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 
+/**
+ * Заглушка «ничего не найдено» с иконкой и действием
+ */
 export function EmptyState({
   icon: Icon,
   title,

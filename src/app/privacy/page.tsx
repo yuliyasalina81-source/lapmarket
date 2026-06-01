@@ -1,3 +1,5 @@
+/** Server Component */
+/** /privacy — политика конфиденциальности */
 export const metadata = { title: "Конфиденциальность — ЛапМаркет" };
 
 export default function PrivacyPage() {

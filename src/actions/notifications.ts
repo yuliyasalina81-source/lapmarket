@@ -1,3 +1,4 @@
+/** Server Actions для уведомлений */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -6,6 +7,11 @@ import { requireSessionUser } from "@/lib/session";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Помечает одно уведомление прочитанным.
+ * @param id — идентификатор уведомления
+ * @returns ActionResult
+ */
 export async function markNotificationRead(id: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -20,6 +26,10 @@ export async function markNotificationRead(id: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Помечает все непрочитанные уведомления пользователя прочитанными.
+ * @returns ActionResult
+ */
 export async function markAllNotificationsRead(): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();

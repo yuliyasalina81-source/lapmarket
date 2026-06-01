@@ -1,3 +1,5 @@
+/** Server Component */
+/** Скелетон загрузки маршрута /feed */
 import { SkeletonGrid } from "@/components/ui/skeleton";
 
 export default function FeedLoading() {

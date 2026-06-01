@@ -1,3 +1,5 @@
+/** Server Component */
+/** /seller/products — каталог товаров продавца */
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";

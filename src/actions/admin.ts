@@ -1,3 +1,4 @@
+/** Server Actions для администрирования */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -14,6 +15,12 @@ async function requireAdmin() {
   return user;
 }
 
+/**
+ * Одобряет заявку на сертификацию продавца и повышает tier до CERTIFIED.
+ * @param requestId — идентификатор SellerCertificationRequest
+ * @param adminNote — комментарий администратора
+ * @returns ActionResult
+ */
 export async function approveCertification(
   requestId: string,
   adminNote?: string
@@ -44,10 +51,17 @@ export async function approveCertification(
     revalidatePath("/admin");
     return { ok: true };
   } catch {
+    // requireAdmin бросает FORBIDDEN или ошибка транзакции
     return { ok: false, error: "Ошибка" };
   }
 }
 
+/**
+ * Отклоняет заявку на сертификацию продавца.
+ * @param requestId — идентификатор заявки
+ * @param adminNote — причина отклонения
+ * @returns ActionResult
+ */
 export async function rejectCertification(
   requestId: string,
   adminNote?: string
@@ -69,6 +83,12 @@ export async function rejectCertification(
   }
 }
 
+/**
+ * Меняет роль пользователя (только ADMIN).
+ * @param userId — идентификатор пользователя
+ * @param role — новая роль UserRole
+ * @returns ActionResult
+ */
 export async function updateUserRole(
   userId: string,
   role: UserRole
@@ -83,6 +103,12 @@ export async function updateUserRole(
   }
 }
 
+/**
+ * Меняет статус товара с панели администратора.
+ * @param productId — идентификатор товара
+ * @param status — ProductStatus
+ * @returns ActionResult
+ */
 export async function updateProductStatusAdmin(
   productId: string,
   status: ProductStatus
@@ -98,10 +124,20 @@ export async function updateProductStatusAdmin(
   }
 }
 
+/**
+ * Удаляет пост от имени администратора.
+ * @param postId — идентификатор поста
+ * @returns ActionResult
+ */
 export async function adminDeletePost(postId: string): Promise<ActionResult> {
   return deletePost(postId, true);
 }
 
+/**
+ * Удаляет отзыв на товар и пересчитывает рейтинг продукта.
+ * @param reviewId — идентификатор ProductReview
+ * @returns ActionResult
+ */
 export async function deleteProductReview(reviewId: string): Promise<ActionResult> {
   try {
     await requireAdmin();
@@ -110,6 +146,7 @@ export async function deleteProductReview(reviewId: string): Promise<ActionResul
     });
     if (!review) return { ok: false, error: "Не найдено" };
 
+    // Пересчёт среднего рейтинга после удаления
     await prisma.productReview.delete({ where: { id: reviewId } });
     const reviews = await prisma.productReview.findMany({
       where: { productId: review.productId },
@@ -131,6 +168,11 @@ export async function deleteProductReview(reviewId: string): Promise<ActionResul
   }
 }
 
+/**
+ * Удаляет отзыв на услугу и пересчитывает рейтинг провайдера.
+ * @param reviewId — идентификатор ServiceReview
+ * @returns ActionResult
+ */
 export async function deleteServiceReview(reviewId: string): Promise<ActionResult> {
   try {
     await requireAdmin();
@@ -159,6 +201,12 @@ export async function deleteServiceReview(reviewId: string): Promise<ActionResul
   }
 }
 
+/**
+ * Включает или отключает галочку verified у провайдера услуг.
+ * @param providerId — идентификатор ServiceProvider
+ * @param verified — флаг верификации
+ * @returns ActionResult
+ */
 export async function toggleProviderVerified(
   providerId: string,
   verified: boolean

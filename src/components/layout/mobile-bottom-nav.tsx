@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Нижняя навигация на мобильных */
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { User } from "lucide-react";
@@ -7,6 +10,9 @@ import { useSession } from "next-auth/react";
 import { mobileNav, type NavItem } from "@/lib/nav";
 import { profileNavHref } from "@/lib/auth-redirect";
 
+/**
+ * Подсвечивает пункт нижнего меню по текущему pathname
+ */
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   if (href.startsWith("/login")) {
@@ -15,6 +21,9 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/**
+ * Таб-бар основных разделов для смартфонов
+ */
 export function MobileBottomNav() {
   const pathname = usePathname();
   const { status } = useSession();

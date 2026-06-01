@@ -1,3 +1,6 @@
+/**
+ * Запросы услуг и бронирований через Prisma (ServiceProvider, ServiceBooking).
+ */
 import { prisma } from "@/lib/prisma";
 import type { ServiceKind } from "@prisma/client";
 
@@ -6,6 +9,11 @@ const providerInclude = {
   user: { select: { displayName: true } },
 };
 
+/**
+ * Верифицированные провайдеры с опциональным фильтром.
+ * @param kind Тип услуги
+ * @param city Подстрока города
+ */
 export async function getServiceProviders(kind?: ServiceKind, city?: string) {
   return prisma.serviceProvider.findMany({
     where: {
@@ -18,6 +26,10 @@ export async function getServiceProviders(kind?: ServiceKind, city?: string) {
   });
 }
 
+/**
+ * Один провайдер по id.
+ * @param id id ServiceProvider
+ */
 export async function getServiceProviderById(id: string) {
   return prisma.serviceProvider.findUnique({
     where: { id },
@@ -25,6 +37,10 @@ export async function getServiceProviderById(id: string) {
   });
 }
 
+/**
+ * Бронирования клиента.
+ * @param userId id пользователя
+ */
 export async function getUserBookings(userId: string) {
   return prisma.serviceBooking.findMany({
     where: { userId },
@@ -37,6 +53,10 @@ export async function getUserBookings(userId: string) {
   });
 }
 
+/**
+ * Бронирования у провайдера, привязанного к userId.
+ * @param userId id владельца провайдера
+ */
 export async function getProviderBookings(userId: string) {
   return prisma.serviceBooking.findMany({
     where: { provider: { userId } },

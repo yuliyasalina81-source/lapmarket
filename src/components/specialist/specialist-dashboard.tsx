@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Дашборд специалиста (legacy) */
+
 import { ProfileForm } from "./profile-form";
 import { LicenseUpload } from "./license-upload";
 import { ServicesCrud } from "./services-crud";
@@ -12,6 +15,9 @@ const VERIFICATION_LABELS: Record<string, string> = {
   rejected: "Отклонён — обновите данные и лицензию",
 };
 
+/**
+ * Кабинет специалиста: записи и услуги
+ */
 export function SpecialistDashboard({
   profile,
   prismaUser,

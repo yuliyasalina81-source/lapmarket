@@ -1,6 +1,12 @@
+/** Server Component */
+/** Hero-блок лендинга «Для бизнеса» */
+
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+/**
+ * Первый экран страницы для ветклиник и грумеров
+ */
 export function ForBusinessHero() {
   return (
     <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 px-6 py-12 text-white shadow-lg shadow-emerald-900/15 sm:px-10 sm:py-16">

@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Онбординг после первого входа */
+
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { completeOnboarding } from "@/actions/onboarding";
@@ -8,6 +11,9 @@ import { Button } from "@/components/ui/button";
 const inputClass =
   "w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm";
 
+/**
+ * Мастер заполнения профиля нового пользователя
+ */
 export function OnboardingForm() {
   const [pending, startTransition] = useTransition();
 

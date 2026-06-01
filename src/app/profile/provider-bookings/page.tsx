@@ -1,3 +1,5 @@
+/** Server Component */
+/** /profile/provider-bookings — записи клиентов у провайдера услуг */
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";

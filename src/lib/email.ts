@@ -1,9 +1,20 @@
+/**
+ * Отправка email через Resend API; в dev без ключа — лог в консоль.
+ */
+
+/**
+ * Отправляет письмо получателю (или логирует в dev).
+ * @param params to, subject, html
+ * @returns { ok: true } или { ok: false, error } при сбое API
+ */
 export async function sendEmail(params: {
   to: string;
   subject: string;
   html: string;
+  replyTo?: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
+  // Нет ключа — режим разработки, не бросаем ошибку
   if (!apiKey) {
     console.info("[email:dev]", params.to, params.subject);
     return { ok: true as const };
@@ -20,6 +31,7 @@ export async function sendEmail(params: {
       to: params.to,
       subject: params.subject,
       html: params.html,
+      ...(params.replyTo ? { reply_to: params.replyTo } : {}),
     }),
   });
 

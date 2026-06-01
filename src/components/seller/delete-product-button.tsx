@@ -1,10 +1,16 @@
 "use client";
 
+/** Client Component */
+/** Удаление товара продавцом */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { deleteProduct } from "@/actions/products";
 
+/**
+ * Кнопка удаления товара с подтверждением
+ */
 export function DeleteProductButton({ productId }: { productId: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();

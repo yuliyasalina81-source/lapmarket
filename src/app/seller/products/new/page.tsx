@@ -1,3 +1,5 @@
+/** Server Component */
+/** /seller/products/new — создание нового товара */
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { isCertifiedSeller } from "@/lib/user";

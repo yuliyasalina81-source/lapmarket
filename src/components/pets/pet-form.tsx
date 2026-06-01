@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Создание и редактирование питомца */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -16,6 +19,9 @@ const kinds: { value: AnimalKind; label: string }[] = [
   { value: "OTHER", label: "Другое" },
 ];
 
+/**
+ * Форма профиля питомца с фото
+ */
 export function PetForm({
   pet,
 }: {

@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Промо-баннер на главной и в разделах */
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
@@ -9,6 +12,9 @@ type PromoBannerProps = {
   className?: string;
 };
 
+/**
+ * Рекламная полоса с CTA и закрытием
+ */
 export function PromoBanner({ className = "" }: PromoBannerProps) {
   const [visible, setVisible] = useState(false);
 

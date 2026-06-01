@@ -1,3 +1,6 @@
+/** Server Component */
+/** Шаги подключения бизнеса к платформе */
+
 const steps = [
   {
     emoji: "📝",
@@ -16,6 +19,9 @@ const steps = [
   },
 ];
 
+/**
+ * Блок «Как начать» для партнёров
+ */
 export function ForBusinessSteps() {
   return (
     <section className="mt-16">

@@ -1,3 +1,5 @@
+/** Server Component */
+/** /seller/orders — запросы покупателей на товары продавца */
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";

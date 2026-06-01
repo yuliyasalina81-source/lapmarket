@@ -1,3 +1,6 @@
+/**
+ * Web Push уведомления пользователям (VAPID + подписки в Prisma).
+ */
 import { prisma } from "@/lib/prisma";
 
 type PushPayload = {
@@ -6,6 +9,12 @@ type PushPayload = {
   url?: string;
 };
 
+/**
+ * Отправляет push всем подпискам пользователя.
+ * @param userId Идентификатор получателя
+ * @param payload Заголовок, текст и опциональный URL
+ * @returns void; тихий выход без VAPID, подписок или web-push
+ */
 export async function sendPushToUser(userId: string, payload: PushPayload) {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;

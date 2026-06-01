@@ -1,3 +1,4 @@
+/** Server Actions для питомцев */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -39,6 +40,11 @@ function parsePetForm(
   };
 }
 
+/**
+ * Создаёт питомца владельца с опциональным аватаром.
+ * @param formData — поля карточки и avatarMediaId
+ * @returns ActionResult с id питомца
+ */
 export async function createPet(formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -67,6 +73,12 @@ export async function createPet(formData: FormData): Promise<ActionResult> {
   }
 }
 
+/**
+ * Обновляет данные питомца владельца.
+ * @param id — идентификатор питомца
+ * @param formData — поля карточки и avatarMediaId
+ * @returns ActionResult
+ */
 export async function updatePet(id: string, formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -100,6 +112,11 @@ export async function updatePet(id: string, formData: FormData): Promise<ActionR
   }
 }
 
+/**
+ * Удаляет питомца владельца.
+ * @param id — идентификатор питомца
+ * @returns ActionResult
+ */
 export async function deletePet(id: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -112,6 +129,11 @@ export async function deletePet(id: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Создаёт токен публичного доступа к карточке питомца (30 дней).
+ * @param petId — идентификатор питомца
+ * @returns ActionResult с token
+ */
 export async function createPetShareToken(petId: string): Promise<
   ActionResult & { token?: string }
 > {

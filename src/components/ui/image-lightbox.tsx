@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Полноэкранный просмотр изображения */
+
 import { useEffect } from "react";
 import { X } from "lucide-react";
 import { ProductImage } from "@/components/ui/product-image";
@@ -11,6 +14,9 @@ type ImageLightboxProps = {
   onClose: () => void;
 };
 
+/**
+ * Модальный просмотр фото с закрытием
+ */
 export function ImageLightbox({ src, alt, open, onClose }: ImageLightboxProps) {
   useEffect(() => {
     if (!open) return;

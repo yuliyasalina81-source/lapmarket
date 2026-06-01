@@ -1,9 +1,15 @@
+/** Server Component */
+/** Список отзывов и средняя оценка товара */
+
 import { formatRating } from "@/lib/format";
 import { Star } from "lucide-react";
 import type { getProductReviews } from "@/lib/queries/products";
 
 type Review = Awaited<ReturnType<typeof getProductReviews>>[number];
 
+/**
+ * Блок отзывов и рейтинга на странице товара
+ */
 export function ProductReviews({
   reviews,
   rating,

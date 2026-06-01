@@ -1,3 +1,5 @@
+/** Server Component */
+/** /login — вход через NextAuth (credentials), форма LoginForm */
 import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 

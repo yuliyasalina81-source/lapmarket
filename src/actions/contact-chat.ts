@@ -1,3 +1,4 @@
+/** Server Actions для чата по контактам */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -19,6 +20,12 @@ async function canAccessContact(contactId: string, userId: string) {
   return { contact, isBuyer, isSeller };
 }
 
+/**
+ * Отправляет сообщение в переписке по контакту (покупатель или продавец).
+ * @param contactRequestId — идентификатор ContactRequest
+ * @param body — текст сообщения
+ * @returns ActionResult
+ */
 export async function sendContactMessage(
   contactRequestId: string,
   body: string
@@ -29,6 +36,7 @@ export async function sendContactMessage(
     if (!text) return { ok: false, error: "Введите сообщение" };
 
     const access = await canAccessContact(contactRequestId, user.id);
+    // Участник диалога: fromUserId или author объявления
     if (!access) return { ok: false, error: "Нет доступа" };
 
     await prisma.contactMessage.create({
@@ -68,6 +76,11 @@ export async function sendContactMessage(
   }
 }
 
+/**
+ * Помечает входящие сообщения диалога прочитанными.
+ * @param contactRequestId — идентификатор ContactRequest
+ * @returns ActionResult
+ */
 export async function markContactMessagesRead(
   contactRequestId: string
 ): Promise<ActionResult> {
@@ -76,6 +89,7 @@ export async function markContactMessagesRead(
     const access = await canAccessContact(contactRequestId, user.id);
     if (!access) return { ok: false, error: "Нет доступа" };
 
+    // Чужие непрочитанные (senderId !== текущий пользователь)
     await prisma.contactMessage.updateMany({
       where: {
         contactRequestId,

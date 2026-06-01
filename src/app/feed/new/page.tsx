@@ -1,3 +1,5 @@
+/** Server Component */
+/** /feed/new — создание нового поста в ленте */
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getUserPets } from "@/lib/queries/pets";

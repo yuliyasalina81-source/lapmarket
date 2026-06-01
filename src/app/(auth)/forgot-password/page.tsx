@@ -1,3 +1,5 @@
+/** Server Component */
+/** /forgot-password — запрос письма со ссылкой сброса пароля */
 import Link from "next/link";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 

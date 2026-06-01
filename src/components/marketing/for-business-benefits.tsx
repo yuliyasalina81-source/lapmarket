@@ -1,3 +1,6 @@
+/** Server Component */
+/** Преимущества платформы для бизнеса */
+
 import { BadgePercent, Headphones, ShieldCheck } from "lucide-react";
 
 const benefits = [
@@ -18,6 +21,9 @@ const benefits = [
   },
 ];
 
+/**
+ * Список выгод для клиник и салонов
+ */
 export function ForBusinessBenefits() {
   return (
     <section className="mt-16">

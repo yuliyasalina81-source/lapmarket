@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Загрузка лицензии специалиста */
+
 import { useRef, useTransition } from "react";
 import { toast } from "sonner";
 import { uploadLicense } from "@/actions/services-supabase";
 
+/**
+ * Поле загрузки документа ветврача/грумера
+ */
 export function LicenseUpload({ currentUrl }: { currentUrl: string | null }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();

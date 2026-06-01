@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Список записей в кабинете специалиста */
+
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { updateAppointmentStatus } from "@/actions/services-supabase";
@@ -12,6 +15,9 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: "Отменена",
 };
 
+/**
+ * Таблица приёмов с фильтром по статусу
+ */
 export function AppointmentsList({
   appointments,
 }: {
@@ -92,6 +98,9 @@ export function AppointmentsList({
   );
 }
 
+/**
+ * Кнопка подтверждения/отмены записи в списке приёмов
+ */
 function ActionBtn({
   onClick,
   label,

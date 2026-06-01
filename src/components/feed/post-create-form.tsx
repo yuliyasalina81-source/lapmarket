@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Публикация нового поста */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -7,6 +10,9 @@ import { toast } from "sonner";
 import { createPost } from "@/actions/posts";
 import { ImageUpload } from "@/components/ui/image-upload";
 
+/**
+ * Форма создания поста с фото
+ */
 export function PostCreateForm({
   pets,
 }: {

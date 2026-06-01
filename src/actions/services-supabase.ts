@@ -1,3 +1,4 @@
+/** Server Actions для услуг и записей (Supabase) */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -18,6 +19,15 @@ function fail(message: string): { ok: false; error: string } {
   return { ok: false, error: message };
 }
 
+/**
+ * Создаёт запись к одобренному специалисту на свободный слот.
+ * @param specialistId — id specialist_profiles
+ * @param serviceId — id услуги
+ * @param appointmentTimeIso — время ISO
+ * @param note — комментарий
+ * @param petId — опциональный питомец
+ * @returns ActionResult
+ */
 export async function createAppointment(
   specialistId: string,
   serviceId: string,
@@ -46,6 +56,7 @@ export async function createAppointment(
       verification_status: string;
     } | null;
 
+    // Только verification_status approved
     if (!specialist) return fail("Специалист недоступен");
 
     const { data: serviceRow } = await supabase
@@ -64,6 +75,7 @@ export async function createAppointment(
     if (!service) return fail("Услуга не найдена");
 
     const appointmentTime = new Date(appointmentTimeIso);
+    // Валидация ISO-даты
     if (isNaN(appointmentTime.getTime())) {
       return fail("Некорректное время");
     }
@@ -87,6 +99,7 @@ export async function createAppointment(
       booked.map((b) => (b as { appointment_time: string }).appointment_time)
     );
 
+    // Слот должен быть в сгенерированном списке
     if (!slots.some((s) => s.iso === appointmentTime.toISOString())) {
       return fail("Выбранное время занято или недоступно");
     }
@@ -128,6 +141,12 @@ export async function createAppointment(
   }
 }
 
+/**
+ * Меняет статус записи; клиент может только cancelled.
+ * @param appointmentId — id appointments
+ * @param status — AppointmentStatus
+ * @returns ActionResult
+ */
 export async function updateAppointmentStatus(
   appointmentId: string,
   status: AppointmentStatus
@@ -156,6 +175,7 @@ export async function updateAppointmentStatus(
       return fail("Недостаточно прав");
     }
 
+    // Клиент: только cancelled
     if (isCustomer && status !== "cancelled") {
       return fail("Клиент может только отменить запись");
     }
@@ -175,6 +195,11 @@ export async function updateAppointmentStatus(
   }
 }
 
+/**
+ * Обновляет профиль специалиста и связанный profiles в Supabase.
+ * @param formData — city, address, about, phone, fullName
+ * @returns ActionResult
+ */
 export async function updateSpecialistProfile(formData: FormData): Promise<ActionResult> {
   if (!isSupabaseConfigured()) return fail("Supabase не настроен");
 
@@ -214,6 +239,11 @@ export async function updateSpecialistProfile(formData: FormData): Promise<Actio
   }
 }
 
+/**
+ * Создаёт или обновляет услугу специалиста в Supabase.
+ * @param formData — id (опц.), name, price, durationMinutes, description
+ * @returns ActionResult
+ */
 export async function upsertService(formData: FormData): Promise<ActionResult> {
   if (!isSupabaseConfigured()) return fail("Supabase не настроен");
 
@@ -257,6 +287,11 @@ export async function upsertService(formData: FormData): Promise<ActionResult> {
   }
 }
 
+/**
+ * Удаляет услугу специалиста.
+ * @param serviceId — id services
+ * @returns ActionResult
+ */
 export async function deleteService(serviceId: string): Promise<ActionResult> {
   if (!isSupabaseConfigured()) return fail("Supabase не настроен");
 
@@ -280,6 +315,11 @@ export async function deleteService(serviceId: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Создаёт или обновляет правило доступности по дню недели.
+ * @param formData — id, weekday, startTime, endTime, breakStart, breakEnd
+ * @returns ActionResult
+ */
 export async function saveAvailabilityRule(formData: FormData): Promise<ActionResult> {
   if (!isSupabaseConfigured()) return fail("Supabase не настроен");
 
@@ -323,6 +363,11 @@ export async function saveAvailabilityRule(formData: FormData): Promise<ActionRe
   }
 }
 
+/**
+ * Удаляет правило расписания специалиста.
+ * @param ruleId — id availability_rules
+ * @returns ActionResult
+ */
 export async function deleteAvailabilityRule(ruleId: string): Promise<ActionResult> {
   if (!isSupabaseConfigured()) return fail("Supabase не настроен");
 
@@ -346,6 +391,12 @@ export async function deleteAvailabilityRule(ruleId: string): Promise<ActionResu
   }
 }
 
+/**
+ * Меняет verification_status специалиста (только админ).
+ * @param specialistId — id specialist_profiles
+ * @param status — VerificationStatus
+ * @returns ActionResult
+ */
 export async function setSpecialistVerification(
   specialistId: string,
   status: VerificationStatus
@@ -396,6 +447,11 @@ export async function setSpecialistVerification(
   }
 }
 
+/**
+ * Загружает лицензию в storage и ставит verification pending.
+ * @param formData — поле file
+ * @returns ActionResult с url публичной ссылки
+ */
 export async function uploadLicense(
   formData: FormData
 ): Promise<ActionResult & { url?: string }> {
@@ -442,6 +498,13 @@ export async function uploadLicense(
   }
 }
 
+/**
+ * Возвращает свободные слоты на день для услуги специалиста.
+ * @param specialistId — id specialist_profiles
+ * @param serviceId — id services (длительность)
+ * @param dateIso — дата ISO
+ * @returns { ok, slots } или { ok: false, error }
+ */
 export async function getAvailableSlots(
   specialistId: string,
   serviceId: string,
@@ -485,6 +548,11 @@ export async function getAvailableSlots(
   }
 }
 
+/**
+ * Создаёт profiles и specialist_profiles при регистрации SPECIALIST.
+ * @param data — userId, fullName, city, kind, address, licenseUrl, specialties
+ * @returns ActionResult (ok без Supabase — no-op)
+ */
 export async function registerSpecialistProfile(data: {
   userId: string;
   fullName: string;

@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Форма входа с OAuth и редиректом после авторизации */
+
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -16,6 +19,9 @@ type SignInResult = {
   url?: string | null;
 };
 
+/**
+ * Проверяет, вернул ли signIn ошибку авторизации
+ */
 function isSignInFailure(result: unknown): boolean {
   if (result && typeof result === "object" && "error" in result) {
     const { error, ok } = result as SignInResult;
@@ -34,6 +40,9 @@ function isSignInFailure(result: unknown): boolean {
   return false;
 }
 
+/**
+ * Форма входа по email/паролю и соцсетям
+ */
 export function LoginForm() {
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered") === "1";

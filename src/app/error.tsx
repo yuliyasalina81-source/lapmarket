@@ -1,3 +1,5 @@
+/** Client Component */
+/** Граница ошибок сегмента: логирование и кнопка повтора */
 "use client";
 
 import { useEffect } from "react";

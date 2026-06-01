@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Входящие диалоги пользователя */
+
 import Link from "next/link";
 import { useTransition } from "react";
 import { MessageCircle } from "lucide-react";
@@ -19,6 +22,9 @@ type Thread = {
   lastMessage?: { body: string; createdAt: Date } | null;
 };
 
+/**
+ * Список чатов и переписка
+ */
 export function InboxView({ threads }: { threads: Thread[] }) {
   const [pending, startTransition] = useTransition();
 

@@ -1,3 +1,5 @@
+/** Server Component */
+/** 404: страница не найдена, ссылка на главную */
 import Link from "next/link";
 import { PawPrint } from "lucide-react";
 

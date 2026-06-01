@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Создание нового объявления о животном */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -10,6 +13,9 @@ import { ANIMAL_KIND_LABELS } from "@/lib/constants";
 
 const kinds = Object.keys(ANIMAL_KIND_LABELS) as AnimalKind[];
 
+/**
+ * Форма публикации объявления с фото и бейджами
+ */
 export function ListingForm() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -95,6 +101,9 @@ export function ListingForm() {
   );
 }
 
+/**
+ * Поле формы объявления с label
+ */
 function Field({
   label,
   name,

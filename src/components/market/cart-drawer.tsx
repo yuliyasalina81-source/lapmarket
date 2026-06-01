@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Боковая панель корзины покупок */
+
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { ShoppingCart, X, Trash2 } from "lucide-react";
@@ -15,6 +18,9 @@ type ProductInfo = {
   sellerName: string;
 };
 
+/**
+ * Выдвижная корзина с товарами и оформлением
+ */
 export function CartDrawer({
   productsById,
 }: {

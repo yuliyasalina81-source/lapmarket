@@ -1,3 +1,4 @@
+/** Server Actions для регистрации и аутентификации */
 "use server";
 
 import { prisma } from "@/lib/prisma";
@@ -79,6 +80,12 @@ async function uploadSpecialistLicense(
   }
 }
 
+/**
+ * Регистрирует пользователя по роли (OWNER, SELLER, SHELTER, SPECIALIST).
+ * @param _prev — предыдущее состояние useActionState
+ * @param formData — поля формы регистрации и опционально license для SPECIALIST
+ * @returns RegisterState с redirectTo, error или fieldErrors
+ */
 export async function registerUser(
   _prev: RegisterState,
   formData: FormData
@@ -101,6 +108,7 @@ export async function registerUser(
   };
 
   const parsed = registerSchema.safeParse(raw);
+  // Zod: ошибки по полям формы
   if (!parsed.success) {
     return {
       fieldErrors: parsed.error.flatten().fieldErrors as Record<
@@ -114,6 +122,7 @@ export async function registerUser(
   const email = data.email.toLowerCase().trim();
 
   const existing = await prisma.user.findUnique({ where: { email } });
+  // Дубликат email
   if (existing) {
     return { error: "Пользователь с таким email уже зарегистрирован" };
   }
@@ -138,6 +147,7 @@ export async function registerUser(
     role === "SPECIALIST" ? formData.get("license") : null;
 
   if (role === "SPECIALIST") {
+    // Лицензия обязательна и не больше 4 МБ
     if (!(licenseFile instanceof File) || licenseFile.size === 0) {
       return { error: "Загрузите файл лицензии" };
     }
@@ -252,6 +262,7 @@ export async function registerUser(
       });
     }
   } catch (e) {
+    // Откат частично созданного пользователя
     if (userId) {
       await prisma.user.delete({ where: { id: userId } }).catch(() => {});
     }

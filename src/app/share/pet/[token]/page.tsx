@@ -1,3 +1,5 @@
+/** Server Component */
+/** /share/pet/[token] — публичный просмотр паспорта по share-токену */
 import { notFound } from "next/navigation";
 import { getPetByShareToken } from "@/lib/queries/pets";
 import { ProductImage } from "@/components/ui/product-image";

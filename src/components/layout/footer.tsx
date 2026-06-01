@@ -1,6 +1,12 @@
+/** Server Component */
+/** Подвал сайта со ссылками и контактами */
+
 import Link from "next/link";
 import { PawPrint } from "lucide-react";
 
+/**
+ * Футер с навигацией и копирайтом
+ */
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-white/60 bg-white/50 backdrop-blur-sm">

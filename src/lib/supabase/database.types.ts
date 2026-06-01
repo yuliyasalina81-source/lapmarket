@@ -1,3 +1,7 @@
+/**
+ * Сгенерированные типы схемы Supabase (public): профили, специалисты,
+ * услуги, записи и правила доступности. Обновлять при изменении БД в Supabase.
+ */
 export type ProfileRole = "client" | "specialist" | "admin";
 export type SpecialistKind = "vet" | "groomer";
 export type VerificationStatus = "pending" | "approved" | "rejected";

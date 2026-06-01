@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Страница объявлений: галочка, добрые руки, модалка контакта */
+
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -11,6 +14,9 @@ import { createContactRequest } from "@/actions/animals";
 import type { ListingWithRelations } from "@/lib/queries/animals";
 import type { AnimalBadge } from "@prisma/client";
 
+/**
+ * Список объявлений с фильтрами и созданием контакта
+ */
 export function AnimalsView({
   pedigreeListings,
   goodHandsListings,
@@ -113,6 +119,9 @@ export function AnimalsView({
   );
 }
 
+/**
+ * Вкладка «С галочкой» / «Добрые руки» на странице объявлений
+ */
 function TabButton({
   active,
   onClick,

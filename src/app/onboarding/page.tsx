@@ -1,3 +1,5 @@
+/** Server Component */
+/** /onboarding — первый вход: выбор роли и базовые настройки */
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

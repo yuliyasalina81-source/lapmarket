@@ -1,5 +1,11 @@
+/** Server Component */
+/** Изображение товара с fallback */
+
 import Image from "next/image";
 
+/**
+ * Оптимизированное фото товара через next/image
+ */
 export function ProductImage({
   src,
   alt,

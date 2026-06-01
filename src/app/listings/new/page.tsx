@@ -1,3 +1,5 @@
+/** Server Component */
+/** /listings/new — новое объявление о животном (продажа/усыновление) */
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { ListingForm } from "@/components/animals/listing-form";

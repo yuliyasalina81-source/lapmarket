@@ -1,3 +1,5 @@
+/** Server Component */
+/** /profile — профиль пользователя, роли и быстрые ссылки */
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";

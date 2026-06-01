@@ -2,6 +2,9 @@
 
 
 
+/** Client Component */
+/** Личный кабинет: профиль, заказы, питомцы */
+
 import { motion } from "framer-motion";
 
 import Link from "next/link";
@@ -84,6 +87,9 @@ export type ProfileUser = {
 
 
 
+/**
+ * Главная страница профиля с вкладками
+ */
 export function ProfileView({
 
   user,

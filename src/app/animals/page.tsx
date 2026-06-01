@@ -1,3 +1,5 @@
+/** Server Component */
+/** /animals — каталог объявлений: покупка и усыновление животных */
 import { auth } from "@/lib/auth";
 import { getPublishedListings } from "@/lib/queries/animals";
 import { AnimalsView } from "@/components/animals/animals-view";

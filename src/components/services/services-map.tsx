@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Карта специалистов на странице услуг */
+
 import { useState } from "react";
 import { MapPin, List } from "lucide-react";
 import type { CatalogSpecialist } from "@/lib/services/catalog-types";
 
+/**
+ * Интерактивная карта точек оказания услуг
+ */
 export function ServicesMap({
   providers,
 }: {

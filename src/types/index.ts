@@ -1,3 +1,6 @@
+/**
+ * Реэкспорт перечислений и типов Prisma для удобного импорта из @/types.
+ */
 export type {
   UserRole,
   ProductCategory,

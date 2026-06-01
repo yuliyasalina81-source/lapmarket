@@ -1,7 +1,13 @@
 "use client";
 
+/** Client Component */
+/** Баннер установки PWA на устройство */
+
 import { useEffect, useState } from "react";
 
+/**
+ * Приглашение добавить приложение на главный экран
+ */
 export function InstallBanner() {
   const [show, setShow] = useState(false);
 

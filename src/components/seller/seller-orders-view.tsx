@@ -1,11 +1,17 @@
 "use client";
 
+/** Client Component */
+/** Заказы продавца: статусы и детали */
+
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { updateOrderRequestStatus } from "@/actions/orders";
 import type { OrderRequestStatus } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Таблица заказов магазина для продавца
+ */
 export function SellerOrdersView({
   orders,
 }: {

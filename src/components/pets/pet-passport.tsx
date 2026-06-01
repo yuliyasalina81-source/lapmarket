@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Паспорт питомца: данные, прививки, вес */
+
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -45,6 +48,9 @@ const kindLabels: Record<AnimalKind, string> = {
 
 type Tab = "overview" | "health" | "reminders" | "weight";
 
+/**
+ * Детальная карточка питомца с историей
+ */
 export function PetPassport({ pet }: { pet: PetDetail }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("overview");
@@ -375,6 +381,9 @@ export function PetPassport({ pet }: { pet: PetDetail }) {
   );
 }
 
+/**
+ * Числовой показатель в шапке паспорта питомца
+ */
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-xl bg-stone-50 py-3 text-center">
@@ -384,6 +393,9 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
+/**
+ * Блок медкарты: прививки, обработки, визиты
+ */
 function HealthSection({
   title,
   children,

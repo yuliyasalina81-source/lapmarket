@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Баннер статуса сертификации продавца */
+
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { requestCertification } from "@/actions/products";
 
+/**
+ * Уведомление о верификации магазина
+ */
 export function CertificationBanner() {
   const [note, setNote] = useState("");
   const [pending, startTransition] = useTransition();

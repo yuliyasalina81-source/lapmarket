@@ -1,3 +1,5 @@
+/** Server Component */
+/** /pets/new — добавление нового питомца в паспорт */
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { PetForm } from "@/components/pets/pet-form";

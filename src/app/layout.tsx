@@ -1,3 +1,5 @@
+/** Server Component */
+/** Корневой layout приложения: метаданные, навбар, сессия, PWA, футер */
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Inter } from "next/font/google";

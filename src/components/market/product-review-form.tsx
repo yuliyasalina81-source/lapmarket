@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Отправка отзыва на купленный товар */
+
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createProductReview } from "@/actions/orders";
 
+/**
+ * Форма оценки и текста отзыва о товаре
+ */
 export function ProductReviewForm({
   productId,
   orderRequestId,

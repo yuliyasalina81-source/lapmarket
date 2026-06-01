@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Карточка объявления в списке животных */
+
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import { getListingMainImage } from "@/lib/queries/animals";
@@ -9,6 +12,9 @@ import { motion } from "framer-motion";
 import { Heart, MapPin } from "lucide-react";
 import type { ListingWithRelations } from "@/lib/queries/animals";
 
+/**
+ * Карточка объявления с фото, ценой и кнопкой связи
+ */
 export function AnimalCard({
   listing,
   onContact,

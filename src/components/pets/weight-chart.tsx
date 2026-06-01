@@ -1,7 +1,13 @@
 "use client";
 
+/** Client Component */
+/** График веса питомца */
+
 type WeightPoint = { date: Date; kg: number };
 
+/**
+ * Диаграмма динамики веса по журналу
+ */
 export function WeightChart({ logs }: { logs: WeightPoint[] }) {
   if (logs.length === 0) {
     return <p className="text-sm text-stone-500">Нет данных для графика</p>;

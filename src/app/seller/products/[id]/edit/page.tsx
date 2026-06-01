@@ -1,3 +1,5 @@
+/** Server Component */
+/** /seller/products/[id]/edit — редактирование товара продавца */
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

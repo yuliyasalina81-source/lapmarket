@@ -1,3 +1,8 @@
+/**
+ * Генерация свободных слотов записи по правилам доступности и занятым временам.
+ */
+
+/** Правило работы в день недели (0 = воскресенье). */
 export type AvailabilityRule = {
   weekday: number;
   start_time: string;
@@ -6,22 +11,41 @@ export type AvailabilityRule = {
   break_end: string | null;
 };
 
+/** Слот для UI: ISO и подпись на русском. */
 export type TimeSlot = {
   iso: string;
   label: string;
 };
 
+/**
+ * Парсит время HH:mm в минуты от полуночи.
+ * @param time Строка времени
+ * @returns Минуты
+ */
 function parseTimeToMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + (m || 0);
 }
 
+/**
+ * Форматирует минуты в HH:mm.
+ * @param minutes Минуты от полуночи
+ * @returns Строка времени
+ */
 function minutesToTime(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+/**
+ * Строит список свободных слотов на день с учётом перерыва и бронирований.
+ * @param date Календарная дата дня
+ * @param rules Правила доступности специалиста
+ * @param durationMinutes Длительность услуги в минутах
+ * @param bookedIsoTimes Уже занятые моменты (ISO)
+ * @returns Массив доступных TimeSlot (только в будущем)
+ */
 export function generateDaySlots(
   date: Date,
   rules: AvailabilityRule[],
@@ -46,6 +70,7 @@ export function generateDaySlots(
     const breakEnd = rule.break_end ? parseTimeToMinutes(rule.break_end) : null;
 
     while (cursor + durationMinutes <= end) {
+      // Пропуск интервала обеда/перерыва
       if (
         breakStart != null &&
         breakEnd != null &&

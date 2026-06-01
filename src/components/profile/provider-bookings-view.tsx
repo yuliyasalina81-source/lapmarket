@@ -1,11 +1,17 @@
 "use client";
 
+/** Client Component */
+/** Записи специалиста как провайдера услуг */
+
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { updateBookingStatus } from "@/actions/services";
 import type { BookingStatus } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Список приёмов для ветеринара/грумера
+ */
 export function ProviderBookingsView({
   bookings,
 }: {

@@ -1,3 +1,4 @@
+/** Server Actions для товаров маркетплейса */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -27,12 +28,19 @@ export type ActionResult =
   | { ok: true; id?: string }
   | { ok: false; error: string };
 
+/**
+ * Создаёт товар продавца с привязкой медиа из формы.
+ * @param formData — поля title, description, price, category, status, mediaIds
+ * @returns ActionResult с id созданного товара
+ */
 export async function createProduct(formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
+    // Только роль SELLER
     if (user.role !== "SELLER") {
       return { ok: false, error: "Только продавцы могут добавлять товары" };
     }
+    // Сертификация продавца обязательна
     if (!(await isCertifiedSeller(user.id))) {
       return {
         ok: false,
@@ -46,6 +54,7 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
     const category = formData.get("category") as ProductCategory;
     const status = (formData.get("status") as ProductStatus) || "DRAFT";
 
+    // Обязательные поля и корректная цена
     if (!title || !description || isNaN(price)) {
       return { ok: false, error: "Заполните все обязательные поля" };
     }
@@ -73,10 +82,17 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
     revalidatePath("/seller/products");
     return { ok: true, id: product.id };
   } catch {
+    // Неожиданная ошибка Prisma/сессии
     return { ok: false, error: "Не удалось создать товар" };
   }
 }
 
+/**
+ * Обновляет товар; новые mediaIds добавляются к галерее.
+ * @param id — идентификатор товара
+ * @param formData — поля карточки и mediaIds
+ * @returns ActionResult
+ */
 export async function updateProduct(
   id: string,
   formData: FormData
@@ -84,6 +100,7 @@ export async function updateProduct(
   try {
     const user = await requireSessionUser();
     const product = await prisma.product.findUnique({ where: { id } });
+    // Товар должен принадлежать текущему продавцу
     if (!product || product.sellerId !== user.id) {
       return { ok: false, error: "Товар не найден" };
     }
@@ -118,6 +135,11 @@ export async function updateProduct(
   }
 }
 
+/**
+ * Архивирует товар (мягкое удаление).
+ * @param id — идентификатор товара
+ * @returns ActionResult
+ */
 export async function deleteProduct(id: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -125,6 +147,7 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     if (!product || product.sellerId !== user.id) {
       return { ok: false, error: "Товар не найден" };
     }
+    // status ARCHIVED вместо физического delete
     await prisma.product.update({
       where: { id },
       data: { status: "ARCHIVED" },
@@ -137,6 +160,11 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Удаляет одно изображение из галереи товара.
+ * @param imageId — идентификатор ProductImage
+ * @returns ActionResult
+ */
 export async function removeProductImage(imageId: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -144,6 +172,7 @@ export async function removeProductImage(imageId: string): Promise<ActionResult>
       where: { id: imageId },
       include: { product: true },
     });
+    // Проверка владельца через product.sellerId
     if (!image || image.product.sellerId !== user.id) {
       return { ok: false, error: "Изображение не найдено" };
     }
@@ -156,6 +185,11 @@ export async function removeProductImage(imageId: string): Promise<ActionResult>
   }
 }
 
+/**
+ * Отправляет заявку на сертификацию продавца.
+ * @param note — необязательный комментарий к заявке
+ * @returns ActionResult
+ */
 export async function requestCertification(
   note?: string
 ): Promise<ActionResult> {
@@ -168,6 +202,7 @@ export async function requestCertification(
       where: { userId: user.id },
     });
     if (!profile) return { ok: false, error: "Профиль продавца не найден" };
+    // Уже сертифицирован — повторная заявка не нужна
     if (profile.tier === "CERTIFIED") {
       return { ok: false, error: "Вы уже сертифицированы" };
     }
@@ -175,6 +210,7 @@ export async function requestCertification(
     const existing = await prisma.sellerCertificationRequest.findFirst({
       where: { sellerProfileId: profile.id, status: "PENDING" },
     });
+    // Одна активная заявка PENDING
     if (existing) {
       return { ok: false, error: "Заявка уже на рассмотрении" };
     }

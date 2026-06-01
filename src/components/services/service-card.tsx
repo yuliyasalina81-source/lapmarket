@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Карточка услуги специалиста в каталоге */
+
 import Link from "next/link";
 import { formatPrice, formatRating } from "@/lib/format";
 import { SERVICE_KIND_LABELS } from "@/lib/constants";
@@ -8,6 +11,9 @@ import { BadgeCheck, MapPin, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import type { CatalogSpecialist } from "@/lib/services/catalog-types";
 
+/**
+ * Карточка услуги с ценой и ссылкой на запись
+ */
 export function ServiceCard({
   service,
   onBook,

@@ -1,5 +1,9 @@
+/**
+ * Запросы для админ-панели: модерация, пользователи, отзывы, провайдеры.
+ */
 import { prisma } from "@/lib/prisma";
 
+/** Заявки на сертификацию продавцов со статусом PENDING. */
 export async function getPendingCertifications() {
   return prisma.sellerCertificationRequest.findMany({
     where: { status: "PENDING" },
@@ -12,6 +16,7 @@ export async function getPendingCertifications() {
   });
 }
 
+/** Объявления животных на модерации. */
 export async function getPendingListingsForAdmin() {
   return prisma.animalListing.findMany({
     where: { status: "PENDING" },
@@ -23,6 +28,10 @@ export async function getPendingListingsForAdmin() {
   });
 }
 
+/**
+ * Список пользователей для админки.
+ * @param limit Максимум записей
+ */
 export async function getAdminUsers(limit = 50) {
   return prisma.user.findMany({
     select: {
@@ -37,6 +46,10 @@ export async function getAdminUsers(limit = 50) {
   });
 }
 
+/**
+ * Все товары для админки.
+ * @param limit Максимум записей
+ */
 export async function getAdminProducts(limit = 50) {
   return prisma.product.findMany({
     include: {
@@ -48,6 +61,10 @@ export async function getAdminProducts(limit = 50) {
   });
 }
 
+/**
+ * Посты ленты для модерации/просмотра.
+ * @param limit Максимум записей
+ */
 export async function getAdminPosts(limit = 30) {
   return prisma.post.findMany({
     include: {
@@ -59,6 +76,10 @@ export async function getAdminPosts(limit = 30) {
   });
 }
 
+/**
+ * Отзывы на товары.
+ * @param limit Максимум записей
+ */
 export async function getAdminProductReviews(limit = 30) {
   return prisma.productReview.findMany({
     include: {
@@ -70,6 +91,10 @@ export async function getAdminProductReviews(limit = 30) {
   });
 }
 
+/**
+ * Отзывы на услуги.
+ * @param limit Максимум записей
+ */
 export async function getAdminServiceReviews(limit = 30) {
   return prisma.serviceReview.findMany({
     include: {
@@ -81,6 +106,10 @@ export async function getAdminServiceReviews(limit = 30) {
   });
 }
 
+/**
+ * Провайдеры услуг (Prisma) для админки.
+ * @param limit Максимум записей
+ */
 export async function getAdminServiceProviders(limit = 50) {
   return prisma.serviceProvider.findMany({
     include: { user: { select: { displayName: true } } },

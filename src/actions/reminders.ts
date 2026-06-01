@@ -1,3 +1,4 @@
+/** Server Actions для напоминаний по питомцам */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -8,6 +9,12 @@ import type { ReminderType } from "@prisma/client";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Создаёт напоминание для питомца.
+ * @param petId — идентификатор питомца
+ * @param formData — type, title, dueAt, repeatDays
+ * @returns ActionResult
+ */
 export async function createReminder(
   petId: string,
   formData: FormData
@@ -43,6 +50,12 @@ export async function createReminder(
   }
 }
 
+/**
+ * Отмечает напоминание выполненным или пропущенным; при repeatDays создаёт следующее.
+ * @param id — идентификатор напоминания
+ * @param status — DONE или SKIPPED
+ * @returns ActionResult
+ */
 export async function updateReminderStatus(
   id: string,
   status: "DONE" | "SKIPPED"
@@ -79,6 +92,12 @@ export async function updateReminderStatus(
   }
 }
 
+/**
+ * Обновляет название и дату напоминания.
+ * @param id — идентификатор напоминания
+ * @param formData — title, dueAt
+ * @returns ActionResult
+ */
 export async function updateReminder(
   id: string,
   formData: FormData
@@ -108,6 +127,11 @@ export async function updateReminder(
   }
 }
 
+/**
+ * Удаляет напоминание владельца питомца.
+ * @param id — идентификатор напоминания
+ * @returns ActionResult
+ */
 export async function deleteReminder(id: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -123,6 +147,10 @@ export async function deleteReminder(id: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Cron/фон: шлёт уведомления по напоминаниям в ближайшие 3 дня (без дублей за сутки).
+ * @returns число обработанных напоминаний { processed }
+ */
 export async function processDueReminders(): Promise<{ processed: number }> {
   const now = new Date();
   const inThreeDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);

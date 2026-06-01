@@ -1,3 +1,5 @@
+/** Server Component */
+/** /animals/[id] — карточка объявления о животном */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getListingById } from "@/lib/queries/animals";

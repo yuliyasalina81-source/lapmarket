@@ -1,3 +1,5 @@
+/** Server Component */
+/** /search — глобальный поиск по товарам, услугам, постам */
 import Link from "next/link";
 import { globalSearch } from "@/lib/queries/search";
 

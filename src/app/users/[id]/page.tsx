@@ -1,3 +1,5 @@
+/** Server Component */
+/** /users/[id] — публичный профиль пользователя и его посты */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";

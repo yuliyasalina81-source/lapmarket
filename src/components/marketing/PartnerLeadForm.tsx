@@ -1,8 +1,14 @@
 "use client";
 
+/** Client Component */
+/** Заявка партнёра с лендинга для бизнеса */
+
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Форма заявки на подключение к платформе
+ */
 export function PartnerLeadForm() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();

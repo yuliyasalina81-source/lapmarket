@@ -1,3 +1,5 @@
+/** Server Component */
+/** /market — каталог товаров маркетплейса */
 import { getMarketSellers, getPublishedProducts } from "@/lib/queries/products";
 import { MarketView } from "@/components/market/market-view";
 import { CartDrawer } from "@/components/market/cart-drawer";

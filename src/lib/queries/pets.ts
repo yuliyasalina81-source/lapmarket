@@ -1,3 +1,6 @@
+/**
+ * Запросы паспорта питомца: список, карточка, шаринг и напоминания.
+ */
 import { prisma } from "@/lib/prisma";
 import type { ReminderStatus } from "@prisma/client";
 
@@ -24,6 +27,10 @@ const petInclude = {
   },
 };
 
+/**
+ * Питомцы пользователя с аватаром и ближайшим напоминанием.
+ * @param userId Владелец
+ */
 export async function getUserPets(userId: string) {
   return prisma.pet.findMany({
     where: { userId },
@@ -39,6 +46,11 @@ export async function getUserPets(userId: string) {
   });
 }
 
+/**
+ * Полная карточка питомца (только для владельца).
+ * @param id id питомца
+ * @param userId id владельца
+ */
 export async function getPetById(id: string, userId: string) {
   return prisma.pet.findFirst({
     where: { id, userId },
@@ -46,6 +58,10 @@ export async function getPetById(id: string, userId: string) {
   });
 }
 
+/**
+ * Питомец по публичному токену шаринга (с проверкой expiresAt).
+ * @param token Токен из ссылки
+ */
 export async function getPetByShareToken(token: string) {
   const share = await prisma.petShareToken.findUnique({
     where: { token },
@@ -64,6 +80,11 @@ export async function getPetByShareToken(token: string) {
   return share.pet;
 }
 
+/**
+ * Ближайшие напоминания по всем питомцам пользователя.
+ * @param userId Владелец
+ * @param limit Максимум записей
+ */
 export async function getUpcomingReminders(userId: string, limit = 5) {
   return prisma.reminder.findMany({
     where: {

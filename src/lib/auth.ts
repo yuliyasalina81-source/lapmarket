@@ -1,3 +1,7 @@
+/**
+ * Конфигурация NextAuth: вход по email/паролю, JWT-сессия и колбэки
+ * для перенаправления и синхронизации полей пользователя в токене.
+ */
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
@@ -21,6 +25,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = credentials?.email as string | undefined;
         const password = credentials?.password as string | undefined;
 
+        // Нет учётных данных — отказ входа
         if (!email || !password) {
           return null;
         }
@@ -29,6 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: email.toLowerCase().trim() },
         });
 
+        // Пользователь без пароля (OAuth-only и т.п.)
         if (!user?.passwordHash) {
           return null;
         }
@@ -56,6 +62,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async redirect({ url, baseUrl }) {
+      // Относительный путь — дополняем baseUrl
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       try {
         if (new URL(url).origin === baseUrl) return url;
@@ -65,6 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return `${baseUrl}/profile`;
     },
     async jwt({ token, user, trigger, session }) {
+      // Первый вход: копируем поля из user в JWT
       if (user) {
         token.id = user.id!;
         token.role = user.role;
@@ -72,11 +80,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.avatar = user.avatar;
         token.city = user.city;
       }
+      // Обновление сессии с клиента
       if (trigger === "update" && session?.user) {
         if (session.user.avatar) token.avatar = session.user.avatar;
         if (session.user.displayName) token.displayName = session.user.displayName;
         if (session.user.city !== undefined) token.city = session.user.city;
       }
+      // Обновление без avatar в session — подтягиваем из БД
       if (trigger === "update" && token.id && !session?.user?.avatar) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },

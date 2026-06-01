@@ -1,5 +1,13 @@
+/**
+ * Глобальный поиск по постам, товарам, объявлениям и провайдерам услуг (Prisma).
+ */
 import { prisma } from "@/lib/prisma";
 
+/**
+ * Ищет по тексту во всех сущностях (минимум 2 символа).
+ * @param q Поисковая строка
+ * @returns Объекты с массивами до 5 результатов каждого типа
+ */
 export async function globalSearch(q: string) {
   const query = q.trim();
   if (!query || query.length < 2) {

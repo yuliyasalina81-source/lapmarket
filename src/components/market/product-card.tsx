@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Карточка товара в маркетплейсе */
+
 import Link from "next/link";
 import { formatPrice, formatRating } from "@/lib/format";
 import { PRODUCT_CATEGORY_LABELS } from "@/lib/constants";
@@ -12,6 +15,9 @@ import type { getPublishedProducts } from "@/lib/queries/products";
 
 type ProductItem = Awaited<ReturnType<typeof getPublishedProducts>>[number];
 
+/**
+ * Карточка товара с ценой и добавлением в корзину
+ */
 export function ProductCard({ product }: { product: ProductItem }) {
   const imageUrl = getProductMainImage(product);
   const shopName = product.seller.sellerProfile?.shopName;

@@ -1,3 +1,4 @@
+/** Server Actions для медиа галереи питомцев */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -5,6 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { requireSessionUser } from "@/lib/session";
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Добавляет фото в галерею питомца по mediaId из формы.
+ * @param petId — идентификатор питомца
+ * @param formData — поле mediaId (уже загруженный MediaAsset)
+ * @returns ActionResult
+ */
 export async function addPetGalleryPhoto(
   petId: string,
   formData: FormData
@@ -22,6 +29,7 @@ export async function addPetGalleryPhoto(
     const media = await prisma.mediaAsset.findFirst({
       where: { id: mediaId, userId: user.id },
     });
+    // Медиа должно принадлежать текущему пользователю
     if (!media) return { ok: false, error: "Фото не найдено" };
 
     const count = await prisma.petMedia.count({ where: { petId } });
@@ -40,6 +48,12 @@ export async function addPetGalleryPhoto(
   }
 }
 
+/**
+ * Удаляет запись галереи питомца.
+ * @param petId — идентификатор питомца
+ * @param petMediaId — идентификатор PetMedia
+ * @returns ActionResult
+ */
 export async function removePetGalleryPhoto(
   petId: string,
   petMediaId: string

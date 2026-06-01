@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Профиль специалиста в кабинете */
+
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { updateSpecialistProfile } from "@/actions/services-supabase";
 
+/**
+ * Редактирование данных и описания специалиста
+ */
 export function ProfileForm({
   defaultValues,
 }: {

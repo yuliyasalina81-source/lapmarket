@@ -1,3 +1,4 @@
+/** GET /pets/[id]/export — HTML-паспорт питомца для печати (только владелец) */
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getPetById } from "@/lib/queries/pets";

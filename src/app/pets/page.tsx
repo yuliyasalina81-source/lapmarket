@@ -1,3 +1,5 @@
+/** Server Component */
+/** /pets — список питомцев текущего пользователя */
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Plus, PawPrint } from "lucide-react";

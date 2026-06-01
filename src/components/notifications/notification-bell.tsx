@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Колокольчик уведомлений в шапке */
+
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { Bell } from "lucide-react";
@@ -20,6 +23,9 @@ export type NotificationItem = {
   createdAt: Date;
 };
 
+/**
+ * Выпадающий список уведомлений с счётчиком
+ */
 export function NotificationBell({
   notifications,
   unreadCount,

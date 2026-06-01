@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Дашборд специалиста (Prisma) */
+
 import Link from "next/link";
 import { useTransition } from "react";
 import { toast } from "sonner";
@@ -8,6 +11,9 @@ import { ProviderBookingsView } from "@/components/profile/provider-bookings-vie
 import { SERVICE_KIND_LABELS } from "@/lib/constants";
 import type { ServiceKind, BookingStatus } from "@prisma/client";
 
+/**
+ * Кабинет специалиста с данными из Prisma
+ */
 export function SpecialistDashboardPrisma({
   provider,
   bookings,

@@ -1,3 +1,4 @@
+/** Server Actions для записей на услуги (Prisma) */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -8,6 +9,14 @@ import type { BookingStatus } from "@prisma/client";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Создаёт запись на услугу к провайдеру (Prisma ServiceBooking).
+ * @param providerId — идентификатор ServiceProvider
+ * @param scheduledAt — дата/время ISO
+ * @param note — комментарий клиента
+ * @param petId — опциональный питомец
+ * @returns ActionResult
+ */
 export async function createServiceBooking(
   providerId: string,
   scheduledAt: string,
@@ -61,6 +70,12 @@ export async function createServiceBooking(
   }
 }
 
+/**
+ * Меняет статус записи; клиент может только отменить NEW.
+ * @param bookingId — идентификатор ServiceBooking
+ * @param status — BookingStatus
+ * @returns ActionResult
+ */
 export async function updateBookingStatus(
   bookingId: string,
   status: BookingStatus
@@ -79,6 +94,7 @@ export async function updateBookingStatus(
       return { ok: false, error: "Недостаточно прав" };
     }
 
+    // Клиент: только CANCELLED из NEW
     if (isCustomer && !isProvider) {
       if (status !== "CANCELLED" || booking.status !== "NEW") {
         return { ok: false, error: "Можно отменить только новую запись" };
@@ -107,10 +123,22 @@ export async function updateBookingStatus(
   }
 }
 
+/**
+ * Отменяет запись (обёртка над updateBookingStatus).
+ * @param bookingId — идентификатор записи
+ * @returns ActionResult
+ */
 export async function cancelBooking(bookingId: string): Promise<ActionResult> {
   return updateBookingStatus(bookingId, "CANCELLED");
 }
 
+/**
+ * Создаёт отзыв после подтверждённой записи и обновляет рейтинг провайдера.
+ * @param bookingId — идентификатор ServiceBooking
+ * @param rating — оценка 1–5
+ * @param text — текст отзыва
+ * @returns ActionResult
+ */
 export async function createServiceReview(
   bookingId: string,
   rating: number,
@@ -124,6 +152,7 @@ export async function createServiceReview(
     });
     if (!booking) return { ok: false, error: "Запись не найдена или не завершена" };
     if (booking.review) return { ok: false, error: "Отзыв уже оставлен" };
+    // Диапазон рейтинга
     if (rating < 1 || rating > 5) return { ok: false, error: "Оценка от 1 до 5" };
 
     await prisma.serviceReview.create({

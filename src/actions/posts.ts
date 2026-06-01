@@ -1,3 +1,4 @@
+/** Server Actions для ленты и постов */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -52,6 +53,11 @@ function parsePostFields(formData: FormData) {
   return { content, petId, petName, tags };
 }
 
+/**
+ * Публикует пост в ленту с опциональными медиа и привязкой к питомцу.
+ * @param formData — content, petId, tags, mediaIds
+ * @returns ActionResult
+ */
 export async function createPost(formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -98,6 +104,12 @@ export async function createPost(formData: FormData): Promise<ActionResult> {
   }
 }
 
+/**
+ * Редактирует пост автора.
+ * @param postId — идентификатор поста
+ * @param formData — поля поста и mediaIds
+ * @returns ActionResult
+ */
 export async function updatePost(postId: string, formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -144,6 +156,12 @@ export async function updatePost(postId: string, formData: FormData): Promise<Ac
   }
 }
 
+/**
+ * Удаляет пост (автор или админ при asAdmin).
+ * @param postId — идентификатор поста
+ * @param asAdmin — режим удаления с панели администратора
+ * @returns ActionResult
+ */
 export async function deletePost(postId: string, asAdmin = false): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -165,6 +183,11 @@ export async function deletePost(postId: string, asAdmin = false): Promise<Actio
   }
 }
 
+/**
+ * Ставит или снимает лайк; уведомляет автора при новом лайке.
+ * @param postId — идентификатор поста
+ * @returns ActionResult
+ */
 export async function togglePostLike(postId: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -200,6 +223,12 @@ export async function togglePostLike(postId: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Добавляет комментарий к посту.
+ * @param postId — идентификатор поста
+ * @param content — текст комментария
+ * @returns ActionResult
+ */
 export async function addComment(
   postId: string,
   content: string
@@ -236,6 +265,11 @@ export async function addComment(
   }
 }
 
+/**
+ * Удаляет комментарий (автор или ADMIN).
+ * @param commentId — идентификатор комментария
+ * @returns ActionResult
+ */
 export async function deleteComment(commentId: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -253,6 +287,11 @@ export async function deleteComment(commentId: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Подгружает следующую страницу ленты (пагинация по cursor).
+ * @param cursor — идентификатор последнего поста на странице
+ * @returns массив постов из getFeedPosts
+ */
 export async function loadMoreFeedPosts(cursor: string) {
   const posts = await getFeedPosts(20, cursor);
   return posts;

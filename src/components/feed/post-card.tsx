@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Карточка поста с лайками и комментариями */
+
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
@@ -13,6 +16,9 @@ import { togglePostLike, addComment, deletePost, deleteComment } from "@/actions
 import { PostEditModal } from "./post-edit-modal";
 import { getPostImageUrls, type FeedPostData } from "@/lib/queries/posts";
 
+/**
+ * Форматирует дату поста для отображения в ленте (ru-RU)
+ */
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("ru-RU", {
     day: "numeric",
@@ -20,6 +26,9 @@ function formatDate(date: Date): string {
   }).format(date);
 }
 
+/**
+ * Один пост в ленте с действиями
+ */
 export function PostCard({
   post,
   currentUserId,

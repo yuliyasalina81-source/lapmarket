@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Редактор расписания приёма */
+
 import { useTransition } from "react";
 import { toast } from "sonner";
 import {
@@ -9,6 +12,9 @@ import {
 
 const WEEKDAYS = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
+/**
+ * Настройка рабочих часов и слотов
+ */
 export function AvailabilityEditor({
   rules,
 }: {

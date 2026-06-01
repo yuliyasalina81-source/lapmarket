@@ -1,3 +1,6 @@
+/** Server Component */
+/** Карточка питомца в списке */
+
 import Link from "next/link";
 import { PawPrint, Calendar } from "lucide-react";
 import { ProductImage } from "@/components/ui/product-image";
@@ -11,6 +14,9 @@ const kindLabels: Record<AnimalKind, string> = {
   OTHER: "Другое",
 };
 
+/**
+ * Краткая карточка питомца со ссылкой на паспорт
+ */
 export function PetCard({
   pet,
 }: {

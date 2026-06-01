@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** FAQ с аккордеоном на лендинге бизнеса */
+
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
@@ -18,6 +21,9 @@ const faqItems = [
   },
 ];
 
+/**
+ * Частые вопросы для партнёров
+ */
 export function ForBusinessFaq() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 

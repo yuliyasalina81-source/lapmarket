@@ -1,3 +1,5 @@
+/** Server Component */
+/** /market/[id] — карточка товара, запрос продавцу */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ShieldCheck, Star } from "lucide-react";

@@ -1,8 +1,14 @@
 "use client";
 
+/** Client Component */
+/** Выбор даты и времени при записи */
+
 import { useEffect, useState, useTransition } from "react";
 import { getAvailableSlots } from "@/actions/services-supabase";
 
+/**
+ * Календарь свободных слотов специалиста
+ */
 export function SlotPicker({
   specialistId,
   serviceId,

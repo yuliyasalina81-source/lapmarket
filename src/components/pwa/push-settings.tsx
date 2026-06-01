@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Настройки push-уведомлений PWA */
+
 import { useState, useTransition } from "react";
 import { Bell, BellOff } from "lucide-react";
 import { toast } from "sonner";
 
+/**
+ * Декодирует VAPID public key из base64url в Uint8Array для push-подписки
+ */
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
@@ -13,6 +19,9 @@ function urlBase64ToUint8Array(base64String: string) {
   return arr;
 }
 
+/**
+ * Включение и отключение web push
+ */
 export function PushSettings() {
   const [enabled, setEnabled] = useState(false);
   const [pending, startTransition] = useTransition();

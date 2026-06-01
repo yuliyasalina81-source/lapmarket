@@ -1,10 +1,16 @@
 "use client";
 
+/** Client Component */
+/** CRUD услуг специалиста */
+
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { deleteService, upsertService } from "@/actions/services-supabase";
 import { formatPrice } from "@/lib/format";
 
+/**
+ * Создание, редактирование и удаление услуг
+ */
 export function ServicesCrud({
   services,
 }: {

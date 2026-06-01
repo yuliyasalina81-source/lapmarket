@@ -1,6 +1,12 @@
+/** Server Component */
+/** Аватар пользователя: URL или инициалы */
+
 import Image from "next/image";
 import { isImageUrl } from "@/lib/constants";
 
+/**
+ * Круглый аватар из картинки или букв имени
+ */
 export function AvatarDisplay({
   avatar,
   name,

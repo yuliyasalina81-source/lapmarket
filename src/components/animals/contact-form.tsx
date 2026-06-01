@@ -1,11 +1,17 @@
 "use client";
 
+/** Client Component */
+/** Форма заявки на связь с автором объявления */
+
 import { useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { createContactRequest } from "@/actions/animals";
 
+/**
+ * Форма «Написать продавцу» для объявления
+ */
 export function ContactForm({
   listingId,
   listingName,

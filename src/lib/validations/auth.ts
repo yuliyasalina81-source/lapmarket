@@ -1,10 +1,15 @@
+/**
+ * Zod-схемы валидации форм входа и регистрации с условными правилами по роли.
+ */
 import { z } from "zod";
 
+/** Схема входа: email и пароль. */
 export const loginSchema = z.object({
   email: z.string().email("Введите корректный email"),
   password: z.string().min(1, "Введите пароль"),
 });
 
+/** Схема регистрации с доп. полями для SELLER, SPECIALIST, SHELTER. */
 export const registerSchema = z
   .object({
     email: z.string().email("Введите корректный email"),
@@ -93,4 +98,5 @@ export const registerSchema = z
     }
   });
 
+/** Тип данных формы регистрации после валидации. */
 export type RegisterInput = z.infer<typeof registerSchema>;

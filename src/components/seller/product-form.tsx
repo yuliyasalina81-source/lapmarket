@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Создание и редактирование товара */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -21,6 +24,9 @@ type ProductFormProps = {
   };
 };
 
+/**
+ * Форма товара: название, цена, фото, описание
+ */
 export function ProductForm({ product }: ProductFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -101,6 +107,9 @@ export function ProductForm({ product }: ProductFormProps) {
   );
 }
 
+/**
+ * Поле формы товара с подписью и ошибкой
+ */
 function Field({
   label,
   name,

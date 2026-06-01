@@ -1,10 +1,16 @@
 "use client";
 
+/** Client Component */
+/** Форма запроса ссылки для сброса пароля */
+
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { requestPasswordReset } from "@/actions/password";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Форма «Забыли пароль?» с отправкой email
+ */
 export function ForgotPasswordForm() {
   const [pending, startTransition] = useTransition();
 

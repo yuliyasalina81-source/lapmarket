@@ -1,3 +1,7 @@
+/**
+ * Константы навигации: пункты основного меню и нижней панели на мобильных.
+ * Содержит href, подписи и иконки Lucide для шапки и tab bar.
+ */
 import {
   Home,
   Newspaper,
@@ -8,6 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+/** Элемент навигации с ссылкой, подписью и иконкой. */
 export type NavItem = {
   href: string;
   label: string;

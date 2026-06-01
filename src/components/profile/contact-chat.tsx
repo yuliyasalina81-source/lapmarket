@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Чат между пользователями в профиле */
+
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +21,9 @@ type Message = {
   sender: { displayName: string; avatar: string };
 };
 
+/**
+ * Переписка по объявлению или заказу
+ */
 export function ContactChat({
   contactId,
   listingName,

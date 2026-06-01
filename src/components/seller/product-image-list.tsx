@@ -1,11 +1,17 @@
 "use client";
 
+/** Client Component */
+/** Управление галереей фото товара */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { removeProductImage } from "@/actions/products";
 import { ProductImage } from "@/components/ui/product-image";
 
+/**
+ * Список изображений товара с удалением
+ */
 export function ProductImageList({
   images,
 }: {

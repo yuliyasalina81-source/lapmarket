@@ -1,10 +1,16 @@
 "use client";
 
+/** Client Component */
+/** Админ-панель специалистов из Supabase */
+
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { setSpecialistVerification } from "@/actions/services-supabase";
 import type { VerificationStatus } from "@/lib/supabase/database.types";
 
+/**
+ * Управление заявками специалистов Supabase
+ */
 export function SupabaseSpecialistsPanel({
   specialists,
 }: {

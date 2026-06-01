@@ -1,3 +1,5 @@
+/** Server Component */
+/** Скелетон загрузки маршрута /animals */
 import { SkeletonGrid } from "@/components/ui/skeleton";
 
 export default function AnimalsLoading() {

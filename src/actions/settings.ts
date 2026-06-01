@@ -1,3 +1,4 @@
+/** Server Actions для настроек профиля */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -7,6 +8,11 @@ import { uploadImage } from "@/actions/media";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Обновляет displayName и город в профиле.
+ * @param formData — displayName, city
+ * @returns ActionResult
+ */
 export async function updateProfile(formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -30,6 +36,11 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
   }
 }
 
+/**
+ * Загружает аватар и сохраняет URL в профиле.
+ * @param formData — поле file
+ * @returns ActionResult
+ */
 export async function updateAvatar(formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -41,6 +52,7 @@ export async function updateAvatar(formData: FormData): Promise<ActionResult> {
     const uploadForm = new FormData();
     uploadForm.set("file", file);
     const result = await uploadImage(uploadForm, "avatars");
+    // Ошибка uploadImage пробрасывается клиенту
     if (!result.ok) return { ok: false, error: result.error };
 
     await prisma.user.update({

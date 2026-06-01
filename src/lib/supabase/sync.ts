@@ -1,8 +1,13 @@
+/**
+ * Синхронизация пользователей Prisma → Supabase (profiles, specialist_profiles).
+ * Пропускает операции, если Supabase не сконфигурирован.
+ */
 import type { UserRole } from "@prisma/client";
 import type { SpecialistKind } from "@/lib/supabase/database.types";
 import { mapPrismaRoleToProfileRole } from "@/lib/supabase/guard";
 import { createSupabaseServerClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
+/** Данные для upsert профиля в Supabase. */
 export type SyncProfileInput = {
   userId: string;
   role: UserRole;
@@ -12,6 +17,7 @@ export type SyncProfileInput = {
   city?: string | null;
 };
 
+/** Данные для создания/обновления профиля специалиста. */
 export type SyncSpecialistInput = {
   userId: string;
   kind: SpecialistKind;
@@ -21,7 +27,13 @@ export type SyncSpecialistInput = {
   specialties?: string[];
 };
 
+/**
+ * Создаёт или обновляет строку profiles в Supabase.
+ * @param input Поля профиля
+ * @returns void; при ошибке Supabase бросает Error
+ */
 export async function upsertProfile(input: SyncProfileInput): Promise<void> {
+  // Supabase отключён — тихий выход
   if (!isSupabaseConfigured()) return;
 
   const supabase = createSupabaseServerClient();
@@ -40,6 +52,11 @@ export async function upsertProfile(input: SyncProfileInput): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+/**
+ * Создаёт или обновляет профиль специалиста; сначала upsert базового profile.
+ * @param input Данные специалиста
+ * @returns id профиля специалиста или null, если Supabase не настроен
+ */
 export async function upsertSpecialistProfile(
   input: SyncSpecialistInput
 ): Promise<string | null> {
@@ -58,6 +75,7 @@ export async function upsertSpecialistProfile(
     .eq("user_id", input.userId)
     .maybeSingle();
 
+  // Уже есть запись — update
   if (existing.data?.id) {
     const { error } = await supabase
       .from("specialist_profiles")
@@ -74,6 +92,7 @@ export async function upsertSpecialistProfile(
     return existing.data.id;
   }
 
+  // Новый специалист — insert со статусом pending
   const { data, error } = await supabase
     .from("specialist_profiles")
     .insert({
@@ -92,6 +111,11 @@ export async function upsertSpecialistProfile(
   return data.id;
 }
 
+/**
+ * Синхронизует пользователя Prisma в Supabase profiles (упрощённый вызов).
+ * @param user id, role, displayName, avatar, city из Prisma
+ * @returns void
+ */
 export async function syncUserToSupabase(user: {
   id: string;
   role: UserRole;

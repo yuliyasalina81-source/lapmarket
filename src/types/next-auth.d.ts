@@ -1,3 +1,7 @@
+/**
+ * Расширение типов NextAuth: поля сессии и JWT из Prisma User (role, displayName, avatar, city).
+ * Используется в auth.ts, middleware и компонентах с useSession().
+ */
 import type { UserRole } from "@prisma/client";
 import "next-auth";
 import "next-auth/jwt";

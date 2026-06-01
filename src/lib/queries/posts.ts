@@ -1,3 +1,6 @@
+/**
+ * Запросы ленты постов: фид, карточка, посты пользователя и URL картинок.
+ */
 import { prisma } from "@/lib/prisma";
 
 const postInclude = {
@@ -15,6 +18,11 @@ const postInclude = {
   _count: { select: { likes: true, comments: true } },
 };
 
+/**
+ * Лента постов с курсорной пагинацией.
+ * @param limit Размер страницы
+ * @param cursor id последнего поста предыдущей страницы
+ */
 export async function getFeedPosts(limit = 20, cursor?: string) {
   return prisma.post.findMany({
     take: limit,
@@ -24,6 +32,10 @@ export async function getFeedPosts(limit = 20, cursor?: string) {
   });
 }
 
+/**
+ * Один пост с автором, лайками и комментариями.
+ * @param id id поста
+ */
 export async function getPostById(id: string) {
   return prisma.post.findUnique({
     where: { id },
@@ -31,6 +43,12 @@ export async function getPostById(id: string) {
   });
 }
 
+/**
+ * Посты конкретного автора.
+ * @param userId id автора
+ * @param limit Размер страницы
+ * @param cursor Курсор пагинации
+ */
 export async function getUserPosts(userId: string, limit = 20, cursor?: string) {
   return prisma.post.findMany({
     where: { authorId: userId },
@@ -41,12 +59,21 @@ export async function getUserPosts(userId: string, limit = 20, cursor?: string) 
   });
 }
 
+/**
+ * Количество постов пользователя.
+ * @param userId id автора
+ */
 export async function getUserPostCount(userId: string) {
   return prisma.post.count({ where: { authorId: userId } });
 }
 
 export type FeedPostData = Awaited<ReturnType<typeof getFeedPosts>>[number];
 
+/**
+ * Собирает URL изображений поста (gallery или legacy media).
+ * @param post Пост с include images/media
+ * @returns Массив URL
+ */
 export function getPostImageUrls(post: FeedPostData): string[] {
   const fromImages = post.images.map((i) => i.media.url);
   if (fromImages.length > 0) return fromImages;

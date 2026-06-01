@@ -1,3 +1,5 @@
+/** Server Component */
+/** /pets/[id]/edit — редактирование данных питомца */
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getPetById } from "@/lib/queries/pets";

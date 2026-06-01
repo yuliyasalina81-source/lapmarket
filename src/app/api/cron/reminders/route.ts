@@ -1,3 +1,4 @@
+/** GET /api/cron/reminders — cron: отправка напоминаний (Bearer CRON_SECRET) */
 import { NextRequest, NextResponse } from "next/server";
 import { processDueReminders } from "@/actions/reminders";
 

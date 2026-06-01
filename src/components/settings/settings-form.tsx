@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Настройки аккаунта пользователя */
+
 import { useTransition } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -8,6 +11,9 @@ import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { PushSettings } from "@/components/pwa/push-settings";
 import type { UserRole } from "@prisma/client";
 
+/**
+ * Форма имени, email, аватара и пароля
+ */
 export function SettingsForm({
   user,
 }: {

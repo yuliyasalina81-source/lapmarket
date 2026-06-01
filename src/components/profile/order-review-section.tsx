@@ -1,7 +1,13 @@
 "use client";
 
+/** Client Component */
+/** Блок отзыва на заказ в профиле */
+
 import { ProductReviewForm } from "@/components/market/product-review-form";
 
+/**
+ * Секция отзыва о доставленном заказе
+ */
 export function OrderReviewSection({
   orderId,
   status,

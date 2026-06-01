@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Предстоящие записи клиента */
+
 import Link from "next/link";
 import { useTransition } from "react";
 import { toast } from "sonner";
@@ -18,6 +21,9 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "Отменена",
 };
 
+/**
+ * Список ближайших приёмов владельца питомца
+ */
 export function ClientAppointments({
   supabaseAppointments,
   prismaBookings,

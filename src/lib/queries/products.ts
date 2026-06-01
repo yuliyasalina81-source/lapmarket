@@ -1,3 +1,6 @@
+/**
+ * Запросы маркетплейса: товары, продавцы, отзывы и главное изображение.
+ */
 import { prisma } from "@/lib/prisma";
 import type { ProductCategory } from "@prisma/client";
 
@@ -17,6 +20,10 @@ export type ProductFilters = {
   sort?: "newest" | "price_asc" | "price_desc" | "rating";
 };
 
+/**
+ * Опубликованные товары сертифицированных продавцов с фильтрами и сортировкой.
+ * @param filters category, price, seller, q, sort
+ */
 export async function getPublishedProducts(filters: ProductFilters = {}) {
   const { category, minPrice, maxPrice, sellerId, q, sort = "newest" } = filters;
 
@@ -57,6 +64,7 @@ export async function getPublishedProducts(filters: ProductFilters = {}) {
   });
 }
 
+/** Список сертифицированных продавцов с опубликованными товарами. */
 export async function getMarketSellers() {
   return prisma.user.findMany({
     where: {
@@ -69,6 +77,10 @@ export async function getMarketSellers() {
   });
 }
 
+/**
+ * Товар по id с изображениями и продавцом.
+ * @param id id товара
+ */
 export async function getProductById(id: string) {
   return prisma.product.findUnique({
     where: { id },
@@ -76,6 +88,10 @@ export async function getProductById(id: string) {
   });
 }
 
+/**
+ * Все товары продавца (любой статус).
+ * @param sellerId id пользователя-продавца
+ */
 export async function getSellerProducts(sellerId: string) {
   return prisma.product.findMany({
     where: { sellerId },
@@ -84,6 +100,10 @@ export async function getSellerProducts(sellerId: string) {
   });
 }
 
+/**
+ * Отзывы на товар.
+ * @param productId id товара
+ */
 export async function getProductReviews(productId: string) {
   return prisma.productReview.findMany({
     where: { productId },
@@ -94,6 +114,11 @@ export async function getProductReviews(productId: string) {
   });
 }
 
+/**
+ * URL первого изображения товара.
+ * @param product Товар с include images
+ * @returns url или null
+ */
 export function getProductMainImage(
   product: Awaited<ReturnType<typeof getPublishedProducts>>[number]
 ): string | null {

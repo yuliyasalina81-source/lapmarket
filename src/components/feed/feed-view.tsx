@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Лента постов сообщества */
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -9,6 +12,9 @@ import { StaggerGrid, StaggerItem } from "@/components/ui/stagger-grid";
 import { loadMoreFeedPosts } from "@/actions/posts";
 import type { FeedPostData } from "@/lib/queries/posts";
 
+/**
+ * Страница ленты с созданием и списком постов
+ */
 export function FeedView({
   posts: initialPosts,
   currentUserId,

@@ -1,3 +1,5 @@
+/** Server Component */
+/** /dashboard/specialist — кабинет специалиста: расписание и записи */
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";

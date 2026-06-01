@@ -1,3 +1,6 @@
+/**
+ * Минимальные типы для пакета web-push (VAPID и sendNotification), если @types/web-push нет.
+ */
 declare module "web-push" {
   export function setVapidDetails(
     subject: string,

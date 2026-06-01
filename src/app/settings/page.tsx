@@ -1,3 +1,5 @@
+/** Server Component */
+/** /settings — настройки аккаунта и уведомлений */
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

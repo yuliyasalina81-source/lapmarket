@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Виджет чата поддержки на лендинге */
+
 import { useState } from "react";
 import { Loader2, MessageCircle } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 
+/**
+ * Плавающая кнопка и окно чата с поддержкой
+ */
 export function ContactChatWidget() {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -23,7 +29,8 @@ export function ContactChatWidget() {
     setError(undefined);
     setPending(true);
 
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     const email = (fd.get("email") as string)?.trim();
     const phone = (fd.get("phone") as string)?.trim();
 
@@ -43,6 +50,7 @@ export function ContactChatWidget() {
           email: email || undefined,
           phone: phone || undefined,
           message: fd.get("message"),
+          company: fd.get("company"),
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
@@ -51,7 +59,7 @@ export function ContactChatWidget() {
         return;
       }
       setDone(true);
-      e.currentTarget.reset();
+      form.reset();
     } catch {
       setError("Ошибка сети. Попробуйте позже.");
     } finally {
@@ -73,10 +81,25 @@ export function ContactChatWidget() {
       <Modal open={open} onClose={handleClose} title="Связаться с нами" size="sm">
         {done ? (
           <p className="py-4 text-center text-sm text-stone-600">
-            Спасибо, мы ответим вам в ближайшее время
+            Спасибо, мы свяжемся с вами как можно скорее
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Honeypot — скрыто от людей, боты часто заполняют */}
+            <div
+              className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
+              aria-hidden
+            >
+              <label htmlFor="chat-company">Компания</label>
+              <input
+                id="chat-company"
+                name="company"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
+
             <div>
               <label htmlFor="chat-name" className="mb-1.5 block text-sm font-medium text-stone-700">
                 Имя
@@ -85,7 +108,8 @@ export function ContactChatWidget() {
                 id="chat-name"
                 name="name"
                 required
-                className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                autoComplete="name"
+                className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-base outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 md:text-sm"
               />
             </div>
             <div>
@@ -96,7 +120,9 @@ export function ContactChatWidget() {
                 id="chat-email"
                 name="email"
                 type="email"
-                className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                inputMode="email"
+                autoComplete="email"
+                className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-base outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 md:text-sm"
               />
             </div>
             <div>
@@ -107,7 +133,9 @@ export function ContactChatWidget() {
                 id="chat-phone"
                 name="phone"
                 type="tel"
-                className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                inputMode="tel"
+                autoComplete="tel"
+                className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-base outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 md:text-sm"
               />
             </div>
             <p className="text-xs text-stone-500">Укажите email или телефон</p>
@@ -119,11 +147,13 @@ export function ContactChatWidget() {
                 id="chat-message"
                 name="message"
                 rows={4}
-                className="w-full resize-y rounded-xl border border-stone-200 px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                className="w-full resize-y rounded-xl border border-stone-200 px-4 py-2.5 text-base outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 md:text-sm"
               />
             </div>
             {error && (
-              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+                {error}
+              </p>
             )}
             <button
               type="submit"

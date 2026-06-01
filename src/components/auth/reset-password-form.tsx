@@ -1,11 +1,17 @@
 "use client";
 
+/** Client Component */
+/** Установка нового пароля по токену из письма */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { resetPassword } from "@/actions/password";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Форма сброса пароля с токеном и email
+ */
 export function ResetPasswordForm({
   token,
   email,

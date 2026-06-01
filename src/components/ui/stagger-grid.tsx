@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Анимированная сетка с появлением элементов */
+
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
@@ -16,6 +19,9 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
 };
 
+/**
+ * Контейнер сетки с framer-motion stagger
+ */
 export function StaggerGrid({
   children,
   className = "",
@@ -35,6 +41,9 @@ export function StaggerGrid({
   );
 }
 
+/**
+ * Дочерний элемент с анимацией появления
+ */
 export function StaggerItem({
   children,
   className = "",

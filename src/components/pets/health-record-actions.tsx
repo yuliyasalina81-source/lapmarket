@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Действия с записями здоровья питомца */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+/**
+ * Кнопки добавления и редактирования медкарты
+ */
 export function HealthRecordActions({
   onDelete,
   deleteLabel = "Удалить",

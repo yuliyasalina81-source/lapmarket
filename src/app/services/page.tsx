@@ -1,3 +1,5 @@
+/** Server Component */
+/** /services — каталог ветеринаров и грумеров, онлайн-запись */
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getApprovedSpecialists } from "@/lib/queries/services-supabase";

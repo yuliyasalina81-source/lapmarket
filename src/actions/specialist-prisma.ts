@@ -1,3 +1,4 @@
+/** Server Actions для профиля специалиста (Prisma) */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -7,6 +8,11 @@ import type { ServiceKind } from "@prisma/client";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Обновляет карточку ServiceProvider в Prisma (fallback без Supabase).
+ * @param formData — providerId, name, kind, city, address, priceFrom
+ * @returns ActionResult
+ */
 export async function updatePrismaProviderProfile(
   formData: FormData
 ): Promise<ActionResult> {

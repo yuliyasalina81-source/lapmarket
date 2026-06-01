@@ -1,3 +1,5 @@
+/** Server Component */
+/** /admin — панель модерации: сертификаты, объявления (роль ADMIN) */
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import {

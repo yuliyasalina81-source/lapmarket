@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Отзыв после завершённой записи */
+
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createServiceReview } from "@/actions/services";
 
+/**
+ * Форма оценки приёма у специалиста
+ */
 export function BookingReviewForm({ bookingId }: { bookingId: string }) {
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");

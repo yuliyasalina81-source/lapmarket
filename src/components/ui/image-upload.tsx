@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Загрузка изображений на сервер */
+
 import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import { ImagePlus, Loader2, X } from "lucide-react";
@@ -17,6 +20,9 @@ type ImageUploadProps = {
   onChange?: (images: UploadedImage[]) => void;
 };
 
+/**
+ * Поле выбора и превью загружаемых фото
+ */
 export function ImageUpload({
   name = "mediaIds",
   folder = "uploads",

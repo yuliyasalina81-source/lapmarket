@@ -1,3 +1,4 @@
+/** Server Actions для AI-советов по питомцам */
 "use server";
 
 import { prisma } from "@/lib/prisma";
@@ -47,6 +48,11 @@ function buildOfflineTips(pet: {
   return lines.join("\n");
 }
 
+/**
+ * Возвращает советы по уходу: OpenAI или офлайн-шаблон без ключа.
+ * @param petId — идентификатор питомца владельца
+ * @returns TipsResult с полем tips
+ */
 export async function getPetAiTips(petId: string): Promise<TipsResult> {
   try {
     const user = await requireSessionUser();
@@ -64,6 +70,7 @@ export async function getPetAiTips(petId: string): Promise<TipsResult> {
     if (!pet) return { ok: false, error: "Питомец не найден" };
 
     const apiKey = process.env.OPENAI_API_KEY;
+    // Без OPENAI_API_KEY — статические советы
     if (!apiKey) {
       return { ok: true, tips: buildOfflineTips(pet) };
     }
@@ -86,6 +93,7 @@ export async function getPetAiTips(petId: string): Promise<TipsResult> {
       }),
     });
 
+    // При ошибке API — fallback на офлайн
     if (!res.ok) {
       return { ok: true, tips: buildOfflineTips(pet) };
     }

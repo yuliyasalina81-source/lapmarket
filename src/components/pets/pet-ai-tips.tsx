@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** AI-подсказки по уходу за питомцем */
+
 import { useState, useTransition } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { getPetAiTips } from "@/actions/pet-ai";
 
+/**
+ * Блок советов от ИИ на странице питомца
+ */
 export function PetAiTips({ petId }: { petId: string }) {
   const [tips, setTips] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();

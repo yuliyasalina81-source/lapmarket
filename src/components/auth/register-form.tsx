@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Многошаговая регистрация с выбором роли пользователя */
+
 import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,6 +22,9 @@ const roles: { value: Role; label: string; desc: string }[] = [
 
 const MAX_LICENSE_MB = 4;
 
+/**
+ * Форма регистрации владельца, продавца, приюта или специалиста
+ */
 export function RegisterForm() {
   const [role, setRole] = useState<Role>("OWNER");
   const [state, action, pending] = useActionState(registerUser, initial);

@@ -1,9 +1,15 @@
 "use client";
 
+/** Client Component */
+/** Добавление товара в корзину из карточки */
+
 import { ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { addToCart } from "@/lib/cart";
 
+/**
+ * Кнопка «В корзину» с обновлением состояния
+ */
 export function AddToCartButton({ productId }: { productId: string }) {
   return (
     <button

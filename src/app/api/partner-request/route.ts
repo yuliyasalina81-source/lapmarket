@@ -1,3 +1,4 @@
+/** POST /api/partner-request — заявка партнёра (клиника) с /for-business, письмо через Resend */
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 

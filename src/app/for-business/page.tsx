@@ -1,3 +1,5 @@
+/** Server Component */
+/** /for-business — лендинг для клиник и партнёров, форма заявки */
 import { ForBusinessHero } from "@/components/marketing/for-business-hero";
 import { ForBusinessSteps } from "@/components/marketing/for-business-steps";
 import { ForBusinessBenefits } from "@/components/marketing/for-business-benefits";

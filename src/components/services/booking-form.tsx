@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Запись на приём к специалисту */
+
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,6 +14,9 @@ import type { CatalogService } from "@/lib/services/catalog-types";
 import { SlotPicker } from "./slot-picker";
 import { formatPrice } from "@/lib/format";
 
+/**
+ * Форма бронирования слота с выбором питомца
+ */
 export function BookingForm({
   specialistId,
   providerName,

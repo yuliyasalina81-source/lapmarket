@@ -1,5 +1,8 @@
 "use client";
 
+/** Client Component */
+/** Верхняя навигация, меню и профиль */
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,6 +35,9 @@ type NavbarClientProps = {
   notifications?: ReactNode;
 };
 
+/**
+ * Шапка с логотипом, ссылками и выпадающим профилем
+ */
 export function NavbarClient({ notifications }: NavbarClientProps) {
   const pathname = usePathname();
   const { data: session, status } = useSession();

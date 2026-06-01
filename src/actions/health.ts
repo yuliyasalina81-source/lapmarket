@@ -1,3 +1,4 @@
+/** Server Actions для здоровья питомцев */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -12,6 +13,12 @@ async function assertPetOwner(petId: string, userId: string) {
   return pet;
 }
 
+/**
+ * Добавляет запись о прививке питомцу.
+ * @param petId — идентификатор питомца
+ * @param formData — name, date, nextDueAt, clinic, notes
+ * @returns ActionResult
+ */
 export async function addVaccination(
   petId: string,
   formData: FormData
@@ -42,10 +49,17 @@ export async function addVaccination(
     revalidatePath(`/pets/${petId}`);
     return { ok: true };
   } catch {
+    // assertPetOwner бросает NOT_FOUND или ошибка БД
     return { ok: false, error: "Не удалось добавить прививку" };
   }
 }
 
+/**
+ * Добавляет медицинскую запись в паспорт питомца.
+ * @param petId — идентификатор питомца
+ * @param formData — title, date, diagnosis, treatment, providerName
+ * @returns ActionResult
+ */
 export async function addMedicalRecord(
   petId: string,
   formData: FormData
@@ -81,6 +95,12 @@ export async function addMedicalRecord(
   }
 }
 
+/**
+ * Добавляет запись веса и обновляет weightKg на карточке питомца.
+ * @param petId — идентификатор питомца
+ * @param kg — вес в килограммах
+ * @returns ActionResult
+ */
 export async function addWeightLog(
   petId: string,
   kg: number
@@ -100,6 +120,12 @@ export async function addWeightLog(
   }
 }
 
+/**
+ * Обновляет прививку владельца питомца.
+ * @param id — идентификатор Vaccination
+ * @param formData — поля прививки
+ * @returns ActionResult
+ */
 export async function updateVaccination(
   id: string,
   formData: FormData
@@ -132,6 +158,11 @@ export async function updateVaccination(
   }
 }
 
+/**
+ * Удаляет прививку.
+ * @param id — идентификатор Vaccination
+ * @returns ActionResult
+ */
 export async function deleteVaccination(id: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -147,6 +178,12 @@ export async function deleteVaccination(id: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Обновляет медицинскую запись.
+ * @param id — идентификатор MedicalRecord
+ * @param formData — поля записи
+ * @returns ActionResult
+ */
 export async function updateMedicalRecord(
   id: string,
   formData: FormData
@@ -182,6 +219,11 @@ export async function updateMedicalRecord(
   }
 }
 
+/**
+ * Удаляет медицинскую запись.
+ * @param id — идентификатор MedicalRecord
+ * @returns ActionResult
+ */
 export async function deleteMedicalRecord(id: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();
@@ -197,6 +239,11 @@ export async function deleteMedicalRecord(id: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Удаляет запись из журнала веса.
+ * @param id — идентификатор WeightLog
+ * @returns ActionResult
+ */
 export async function deleteWeightLog(id: string): Promise<ActionResult> {
   try {
     const user = await requireSessionUser();

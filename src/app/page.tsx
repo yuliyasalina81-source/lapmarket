@@ -1,3 +1,5 @@
+/** Server Component */
+/** Главная (/): лендинг, блоки возможностей, счётчики из БД */
 import Link from "next/link";
 import {
   BadgeCheck,
