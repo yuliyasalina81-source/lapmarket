@@ -22,6 +22,7 @@ import { isImageUrl } from "@/lib/constants";
 import { profileNavHref } from "@/lib/auth-redirect";
 import { filterNavByRole } from "@/lib/coming-soon";
 import { desktopNav } from "@/lib/nav";
+import { SocialLinks } from "@/components/layout/social-links";
 
 const extraNav = [
   { href: "/for-business", label: "Для бизнеса" },
@@ -126,6 +127,9 @@ export function NavbarClient({ notifications }: NavbarClientProps) {
         </nav>
 
         <div className="flex items-center gap-2">
+          <div className="hidden items-center sm:flex">
+            <SocialLinks variant="header" />
+          </div>
           <Link
             href="/search"
             className="hidden rounded-xl px-3 py-2 text-sm font-medium text-stone-600 hover:bg-emerald-50 sm:block"

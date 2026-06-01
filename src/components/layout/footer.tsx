@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { PawPrint } from "lucide-react";
+import { SocialLinks } from "@/components/layout/social-links";
 
 /**
  * Футер с навигацией и копирайтом
@@ -21,6 +22,7 @@ export function Footer() {
               Цифровой паспорт питомца, маркет от сертифицированных продавцов,
               объявления и запись к ветеринару.
             </p>
+            <SocialLinks variant="footer" />
           </div>
           <div>
             <p className="text-sm font-semibold text-stone-800">Разделы</p>
