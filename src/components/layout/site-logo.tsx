@@ -1,40 +1,42 @@
 "use client";
 
-/** Горизонтальный логотип LAPMARKET (SVG) */
+/** Логотип сайта (временно — PWA-иконка) */
 
 import Image from "next/image";
 import Link from "next/link";
 
-const LOGO_SRC = "/logo.svg";
+const LOGO_SRC = "/icon-192.png";
 
 type SiteLogoProps = {
-  /** Высота логотипа в px (32 — шапка, 40 — подвал) */
-  height?: number;
   /** Оборачивать в ссылку на главную */
   linked?: boolean;
+  /** max-h-8 в шапке, max-h-10 в подвале */
+  variant?: "header" | "footer";
   className?: string;
 };
 
 /**
- * Фирменный логотип сайта
+ * Фирменный логотип без обрезки (object-contain)
  */
 export function SiteLogo({
-  height = 32,
   linked = true,
+  variant = "header",
   className = "",
 }: SiteLogoProps) {
-  const width = Math.round(height * (300 / 48));
+  const maxHeight = variant === "footer" ? "max-h-10" : "max-h-8";
+  const boxHeight = variant === "footer" ? "h-10" : "h-8";
 
   const image = (
-    <Image
-      src={LOGO_SRC}
-      alt="ЛапМаркет — здоровье, любовь, забота"
-      width={width}
-      height={height}
-      className={`shrink-0 object-contain object-left ${className}`}
-      style={{ height: `${height}px`, width: "auto" }}
-      priority
-    />
+    <span className={`inline-flex ${boxHeight} items-center ${className}`}>
+      <Image
+        src={LOGO_SRC}
+        alt="ЛапМаркет — здоровье, любовь, забота"
+        width={192}
+        height={192}
+        className={`object-contain w-auto h-full ${maxHeight}`}
+        priority
+      />
+    </span>
   );
 
   if (!linked) {
