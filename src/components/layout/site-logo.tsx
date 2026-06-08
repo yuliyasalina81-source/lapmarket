@@ -1,6 +1,6 @@
 "use client";
 
-/** Логотип ЛапМаркет (сердце + лапа) */
+/** Полный логотип LAPMARKET (иконка + название + слоган) */
 
 import Image from "next/image";
 import Link from "next/link";
@@ -8,57 +8,44 @@ import Link from "next/link";
 const LOGO_SRC = "/logo.png";
 
 type SiteLogoProps = {
-  /** С текстом «ЛапМаркет» рядом */
-  showText?: boolean;
-  /** Размер иконки в px */
-  size?: number;
+  /** Высота логотипа в px */
+  height?: number;
   /** Оборачивать в ссылку на главную */
   linked?: boolean;
   className?: string;
 };
 
 /**
- * Фирменный логотип сайта
+ * Фирменный логотип сайта (изображение целиком, без дублирования текста)
  */
 export function SiteLogo({
-  showText = true,
-  size = 40,
+  height = 44,
   linked = true,
   className = "",
 }: SiteLogoProps) {
   const image = (
     <Image
       src={LOGO_SRC}
-      alt="ЛапМаркет"
-      width={size}
-      height={size}
-      className="shrink-0 rounded-2xl object-contain"
+      alt="ЛапМаркет — здоровье, любовь, забота"
+      width={Math.round(height * 2.8)}
+      height={height}
+      className={`w-auto shrink-0 object-contain object-left ${className}`}
+      style={{ height: `${height}px`, width: "auto" }}
       priority
     />
   );
 
-  const content = (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      {image}
-      {showText && (
-        <span className="text-lg font-bold tracking-tight text-stone-900">
-          Лап<span className="text-emerald-600">Маркет</span>
-        </span>
-      )}
-    </span>
-  );
-
   if (!linked) {
-    return content;
+    return image;
   }
 
   return (
     <Link
       href="/"
-      className="transition hover:opacity-90"
+      className="inline-flex shrink-0 transition hover:opacity-90"
       aria-label="ЛапМаркет — на главную"
     >
-      {content}
+      {image}
     </Link>
   );
 }

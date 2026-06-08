@@ -4,7 +4,7 @@
   "description": "Паспорт питомца, маркет и услуги для владельцев",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ecfdf5",
+  "background_color": "#000000",
   "theme_color": "#059669",
   "lang": "ru",
   "orientation": "any",
@@ -19,13 +19,7 @@
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }
