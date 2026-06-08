@@ -1,14 +1,14 @@
 "use client";
 
-/** Полный логотип LAPMARKET (иконка + название + слоган) */
+/** Горизонтальный логотип LAPMARKET (SVG) */
 
 import Image from "next/image";
 import Link from "next/link";
 
-const LOGO_SRC = "/logo.png";
+const LOGO_SRC = "/logo.svg";
 
 type SiteLogoProps = {
-  /** Высота логотипа в px */
+  /** Высота логотипа в px (32 — шапка, 40 — подвал) */
   height?: number;
   /** Оборачивать в ссылку на главную */
   linked?: boolean;
@@ -16,20 +16,22 @@ type SiteLogoProps = {
 };
 
 /**
- * Фирменный логотип сайта (изображение целиком, без дублирования текста)
+ * Фирменный логотип сайта
  */
 export function SiteLogo({
-  height = 44,
+  height = 32,
   linked = true,
   className = "",
 }: SiteLogoProps) {
+  const width = Math.round(height * (300 / 48));
+
   const image = (
     <Image
       src={LOGO_SRC}
       alt="ЛапМаркет — здоровье, любовь, забота"
-      width={Math.round(height * 2.8)}
+      width={width}
       height={height}
-      className={`w-auto shrink-0 object-contain object-left ${className}`}
+      className={`shrink-0 object-contain object-left ${className}`}
       style={{ height: `${height}px`, width: "auto" }}
       priority
     />

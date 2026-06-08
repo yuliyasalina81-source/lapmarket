@@ -14,7 +14,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
-            <SiteLogo linked={false} height={56} />
+            <SiteLogo linked={false} height={40} />
             <p className="mt-3 max-w-md text-sm leading-relaxed text-stone-600">
               Цифровой паспорт питомца, маркет от сертифицированных продавцов,
               объявления и запись к ветеринару.
