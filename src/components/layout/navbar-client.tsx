@@ -7,7 +7,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  PawPrint,
   Menu,
   X,
   ChevronDown,
@@ -15,6 +14,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { SiteLogo } from "@/components/layout/site-logo";
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
@@ -90,17 +90,7 @@ export function NavbarClient({
   return (
     <header className="sticky top-0 z-50 border-b border-white/60 bg-white/75 shadow-sm shadow-emerald-900/5 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 font-bold text-stone-900 transition hover:opacity-90"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/30">
-            <PawPrint className="h-5 w-5" aria-hidden />
-          </span>
-          <span className="text-lg tracking-tight">
-            Лап<span className="text-emerald-600">Маркет</span>
-          </span>
-        </Link>
+        <SiteLogo />
 
         <nav
           className="hidden items-center gap-1 md:flex"

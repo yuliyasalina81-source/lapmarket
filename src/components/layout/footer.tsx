@@ -2,7 +2,7 @@
 /** Подвал сайта со ссылками и контактами */
 
 import Link from "next/link";
-import { PawPrint } from "lucide-react";
+import { SiteLogo } from "@/components/layout/site-logo";
 import { SocialLinksStatic } from "@/components/layout/social-links-static";
 
 /**
@@ -14,10 +14,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
-            <p className="flex items-center gap-2 font-bold text-stone-900">
-              <PawPrint className="h-5 w-5 text-emerald-600" />
-              Лап<span className="text-emerald-600">Маркет</span>
-            </p>
+            <SiteLogo linked={false} size={36} />
             <p className="mt-3 max-w-md text-sm leading-relaxed text-stone-600">
               Цифровой паспорт питомца, маркет от сертифицированных продавцов,
               объявления и запись к ветеринару.
