@@ -5,10 +5,11 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { PawPrint, Loader2 } from "lucide-react";
-import { getSession, signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { loginSchema } from "@/lib/validations/auth";
 
@@ -44,13 +45,18 @@ function isSignInFailure(result: unknown): boolean {
  * Форма входа по email/паролю и соцсетям
  */
 export function LoginForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
   const registered = searchParams.get("registered") === "1";
   const registeredSpecialist = searchParams.get("registered") === "specialist";
   const supabasePending = searchParams.get("supabase") === "pending";
   const profilePending = searchParams.get("profile") === "pending";
   const callbackRedirect = searchParams.get("callbackUrl");
-  const defaultRedirect = resolvePostLoginPath();
+  const safeCallbackRedirect = callbackRedirect?.startsWith("/")
+    ? callbackRedirect
+    : undefined;
+  const defaultRedirect = resolvePostLoginPath(session?.user?.role);
 
   const [error, setError] = useState<string>();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>();
@@ -62,6 +68,11 @@ export function LoginForm() {
       setError("Неверный email или пароль");
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    router.replace(safeCallbackRedirect ?? defaultRedirect);
+  }, [status, router, safeCallbackRedirect, defaultRedirect]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -89,7 +100,7 @@ export function LoginForm() {
         email: parsed.data.email.toLowerCase().trim(),
         password: parsed.data.password,
         redirect: false,
-        redirectTo: callbackRedirect ?? defaultRedirect,
+        callbackUrl: safeCallbackRedirect ?? defaultRedirect,
       });
 
       if (isSignInFailure(result)) {
@@ -98,11 +109,18 @@ export function LoginForm() {
         return;
       }
 
-      const session = await getSession();
-      const target = callbackRedirect?.startsWith("/")
-        ? callbackRedirect
-        : resolvePostLoginPath(session?.user?.role);
-      window.location.replace(target);
+      const resultUrl =
+        result &&
+        typeof result === "object" &&
+        "url" in result &&
+        typeof result.url === "string"
+          ? result.url
+          : null;
+      if (resultUrl) {
+        window.location.replace(resultUrl);
+      } else {
+        window.location.replace(safeCallbackRedirect ?? defaultRedirect);
+      }
     } catch {
       setError("Ошибка входа. Попробуйте снова.");
       setPending(false);
