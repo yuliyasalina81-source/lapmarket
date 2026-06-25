@@ -89,7 +89,7 @@ export function NavbarClient({
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/60 bg-white/75 shadow-sm shadow-emerald-900/5 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-[7.5rem] max-w-6xl items-center justify-between gap-2 px-3 sm:h-[9rem] sm:gap-3 sm:px-6">
         <SiteLogo />
 
         <nav

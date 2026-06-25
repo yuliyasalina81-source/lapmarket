@@ -1,39 +1,51 @@
 "use client";
 
-/** Логотип сайта (временно — PWA-иконка) */
+/** Горизонтальный логотип LAPMARKET (PNG, прозрачный фон) */
 
 import Image from "next/image";
 import Link from "next/link";
 
-const LOGO_SRC = "/icon-192.png";
+const LOGO_VERSION = "2";
+const LOGO_SRC = `/logo-brand.png?v=${LOGO_VERSION}`;
+const LOGO_WIDTH = 670;
+const LOGO_HEIGHT = 373;
 
 type SiteLogoProps = {
-  /** Оборачивать в ссылку на главную */
   linked?: boolean;
-  /** max-h-8 в шапке, max-h-10 в подвале */
   variant?: "header" | "footer";
   className?: string;
 };
 
 /**
- * Фирменный логотип без обрезки (object-contain)
+ * Логотип целиком, без обрезки (object-contain).
+ * В шапке — максимум внутри текущей высоты navbar (шапку не трогаем).
  */
 export function SiteLogo({
   linked = true,
   variant = "header",
   className = "",
 }: SiteLogoProps) {
-  const maxHeight = variant === "footer" ? "max-h-10" : "max-h-8";
-  const boxHeight = variant === "footer" ? "h-10" : "h-8";
+  const isFooter = variant === "footer";
+
+  const maxHeight = isFooter
+    ? "max-h-[16rem] sm:max-h-[18rem]"
+    : "max-h-[7.1rem] sm:max-h-[8.65rem]";
+  const boxHeight = isFooter
+    ? "h-[16rem] sm:h-[18rem]"
+    : "h-[7.1rem] sm:h-[8.65rem]";
+  const maxWidth = isFooter
+    ? "max-w-[min(1200px,100vw)] sm:max-w-[1400px]"
+    : "max-w-[min(780px,98vw)] sm:max-w-[920px]";
 
   const image = (
-    <span className={`inline-flex ${boxHeight} items-center ${className}`}>
+    <span className={`inline-flex ${boxHeight} max-w-full items-center ${className}`}>
       <Image
         src={LOGO_SRC}
         alt="ЛапМаркет — здоровье, любовь, забота"
-        width={192}
-        height={192}
-        className={`object-contain w-auto h-full ${maxHeight}`}
+        width={LOGO_WIDTH}
+        height={LOGO_HEIGHT}
+        unoptimized
+        className={`h-full w-auto ${maxHeight} ${maxWidth} object-contain object-left`}
         priority
       />
     </span>
@@ -46,7 +58,11 @@ export function SiteLogo({
   return (
     <Link
       href="/"
-      className="inline-flex shrink-0 transition hover:opacity-90"
+      className={`inline-flex shrink-0 transition hover:opacity-90 ${
+        isFooter
+          ? "max-w-[min(1200px,100vw)] sm:max-w-[1400px]"
+          : "max-w-[min(920px,98vw)]"
+      }`}
       aria-label="ЛапМаркет — на главную"
     >
       {image}
