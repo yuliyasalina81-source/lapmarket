@@ -52,9 +52,11 @@ export function BookingForm({
     );
   }
 
+  const hasServices = services.length > 0;
+
   const submit = () => {
     startTransition(async () => {
-      if (useSupabase && serviceId && slotIso) {
+      if (useSupabase && hasServices && serviceId && slotIso) {
         const result = await createAppointment(
           specialistId,
           serviceId,
@@ -71,26 +73,47 @@ export function BookingForm({
         return;
       }
 
-      const result = await createServiceBooking(
-        specialistId,
-        scheduledAt,
-        note,
-        petId || undefined
-      );
-      if (result.ok) {
-        toast.success(`Запись в «${providerName}» создана`);
-        router.refresh();
-      } else {
-        toast.error(result.error);
+      if (!useSupabase) {
+        if (!hasServices || !serviceId) {
+          toast.error("Выберите услугу");
+          return;
+        }
+        if (!scheduledAt) {
+          toast.error("Укажите дату и время");
+          return;
+        }
+        const result = await createServiceBooking(
+          specialistId,
+          serviceId,
+          scheduledAt,
+          note,
+          petId || undefined
+        );
+        if (result.ok) {
+          toast.success(`Запись в «${providerName}» создана`);
+          router.push("/dashboard/client");
+        } else {
+          toast.error(result.error);
+        }
+        return;
       }
+
+      toast.error("Выберите услугу и время");
     });
   };
 
+  const canSubmit =
+    useSupabase && hasServices
+      ? !!slotIso && !!serviceId
+      : !useSupabase && hasServices
+        ? !!scheduledAt && !!serviceId
+        : false;
+
   return (
     <div className="mt-6 space-y-4 border-t border-stone-100 pt-6">
-      {useSupabase && services.length > 0 ? (
+      {hasServices ? (
         <>
-          <h2 className="text-lg font-semibold text-stone-900">Услуги</h2>
+          <h2 className="text-lg font-semibold text-stone-900">Записаться</h2>
           <ul className="space-y-2">
             {services.map((s) => (
               <li
@@ -112,22 +135,26 @@ export function BookingForm({
               </li>
             ))}
           </ul>
-          {serviceId && (
+          {useSupabase && serviceId ? (
             <SlotPicker
               specialistId={specialistId}
               serviceId={serviceId}
               value={slotIso}
               onChange={setSlotIso}
             />
-          )}
+          ) : !useSupabase ? (
+            <input
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
+            />
+          ) : null}
         </>
       ) : (
-        <input
-          type="datetime-local"
-          value={scheduledAt}
-          onChange={(e) => setScheduledAt(e.target.value)}
-          className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
-        />
+        <p className="text-sm text-stone-500">
+          У специалиста пока нет доступных услуг для записи.
+        </p>
       )}
 
       {pets.length > 0 && (
@@ -147,24 +174,25 @@ export function BookingForm({
         </div>
       )}
 
-      <textarea
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        rows={2}
-        placeholder="Комментарий к записи"
-        className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
-      />
-      <button
-        type="button"
-        onClick={submit}
-        disabled={
-          pending ||
-          (useSupabase && services.length > 0 ? !slotIso : !scheduledAt)
-        }
-        className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-      >
-        {pending ? "Запись..." : "Записаться"}
-      </button>
+      {hasServices && (
+        <>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={2}
+            placeholder="Комментарий к записи"
+            className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
+          />
+          <button
+            type="button"
+            onClick={submit}
+            disabled={pending || !canSubmit}
+            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+          >
+            {pending ? "Запись..." : "Записаться"}
+          </button>
+        </>
+      )}
     </div>
   );
 }

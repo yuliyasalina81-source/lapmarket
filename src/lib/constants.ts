@@ -5,6 +5,7 @@
 import type {
   AnimalKind,
   ProductCategory,
+  ServiceCategory,
   ServiceKind,
 } from "@prisma/client";
 
@@ -38,6 +39,19 @@ export const SERVICE_KIND_LABELS: Record<ServiceKind, string> = {
   BOARDING: "Передержка",
   OTHER: "Другое",
 };
+
+/** Подписи категорий отдельных услуг (Prisma Service). */
+export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
+  GROOMING: "Груминг",
+  VET: "Ветеринария",
+  TRAINING: "Дрессировка",
+  BOARDING: "Передержка",
+  OTHER: "Другое",
+};
+
+export const SERVICE_CATEGORIES = Object.keys(
+  SERVICE_CATEGORY_LABELS
+) as ServiceCategory[];
 
 /** URL демо-изображений (Unsplash) для сидов и заглушек. */
 export const DEMO_IMAGE_URLS = {

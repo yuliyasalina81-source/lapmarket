@@ -23,6 +23,10 @@ export function getContactEmail(): string {
   return readEnv("CONTACT_EMAIL") ?? "yaroslav937148@gmail.com";
 }
 
+export function getAdminNotifyEmail(): string | undefined {
+  return readEnv("ADMIN_NOTIFY_EMAIL");
+}
+
 export function isProductionRuntime(): boolean {
   const vercel = readEnv("VERCEL_ENV");
   if (vercel === "production" || vercel === "preview") return true;

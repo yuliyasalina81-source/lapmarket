@@ -40,14 +40,11 @@ function getAuthSecret(): string | undefined {
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
-
   const secret = getAuthSecret();
-  const secureCookie = nextUrl.protocol === "https:";
   const token = secret
     ? await getToken({
         req,
         secret,
-        secureCookie,
       })
     : null;
 

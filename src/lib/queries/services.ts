@@ -46,6 +46,7 @@ export async function getUserBookings(userId: string) {
     where: { userId },
     include: {
       provider: { include: { media: true } },
+      service: { select: { name: true, price: true } },
       pet: { select: { id: true, name: true } },
       review: true,
     },
@@ -64,11 +65,57 @@ export async function getProviderBookings(userId: string) {
       user: { select: { displayName: true, email: true } },
       pet: { select: { name: true } },
       provider: { select: { name: true } },
+      service: { select: { name: true, price: true } },
     },
     orderBy: { scheduledAt: "desc" },
   });
 }
 
+/**
+ * Услуги провайдера (все или только активные).
+ * @param providerId id ServiceProvider
+ * @param options.activeOnly только isActive=true
+ */
+export async function getProviderServices(
+  providerId: string,
+  options?: { activeOnly?: boolean }
+) {
+  return prisma.service.findMany({
+    where: {
+      providerId,
+      ...(options?.activeOnly ? { isActive: true } : {}),
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/**
+ * Активные услуги провайдера для публичной страницы.
+ * @param providerId id ServiceProvider
+ */
+export async function getActiveServicesForProvider(providerId: string) {
+  return getProviderServices(providerId, { activeOnly: true });
+}
+
 export type ServiceProviderWithMedia = Awaited<
   ReturnType<typeof getServiceProviders>
 >[number];
+
+/**
+ * Маппинг Prisma Service → CatalogService для UI.
+ */
+export function toCatalogService(service: {
+  id: string;
+  name: string;
+  duration: number;
+  price: number;
+  description: string | null;
+}) {
+  return {
+    id: service.id,
+    name: service.name,
+    durationMinutes: service.duration,
+    price: service.price,
+    description: service.description,
+  };
+}

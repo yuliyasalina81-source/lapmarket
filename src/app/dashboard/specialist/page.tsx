@@ -9,12 +9,15 @@ import {
   getSpecialistForOwner,
   getSpecialistServices,
 } from "@/lib/queries/services-supabase";
-import { getProviderBookings } from "@/lib/queries/services";
+import {
+  getProviderBookings,
+  getProviderServices,
+} from "@/lib/queries/services";
 import { ensureServiceProviderForUser } from "@/lib/specialist-prisma";
 import { prisma } from "@/lib/prisma";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { SpecialistDashboard } from "@/components/specialist/specialist-dashboard";
-import { SpecialistDashboardPrisma } from "@/components/specialist/specialist-dashboard-prisma";
+import { SpecialistDashboardTabs } from "@/components/specialist/specialist-dashboard-tabs";
 
 export const metadata = { title: "Кабинет специалиста — ЛапМаркет" };
 
@@ -33,6 +36,7 @@ export default async function SpecialistDashboardPage() {
     if (!provider) redirect("/profile");
 
     const bookings = await getProviderBookings(session.user.id);
+    const services = await getProviderServices(provider.id);
 
     return (
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
@@ -40,8 +44,9 @@ export default async function SpecialistDashboardPage() {
           ← Профиль
         </Link>
         <h1 className="mt-4 text-2xl font-bold text-stone-900">Кабинет специалиста</h1>
-        <SpecialistDashboardPrisma
+        <SpecialistDashboardTabs
           provider={provider}
+          services={services}
           bookings={bookings}
           supabaseConfigured={false}
         />
@@ -55,6 +60,7 @@ export default async function SpecialistDashboardPage() {
     const provider = await ensureServiceProviderForUser(session.user.id);
     if (provider) {
       const bookings = await getProviderBookings(session.user.id);
+      const services = await getProviderServices(provider.id);
       return (
         <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
           <Link href="/profile" className="text-sm text-emerald-700 hover:underline">
@@ -64,8 +70,9 @@ export default async function SpecialistDashboardPage() {
           <p className="mt-2 text-sm text-stone-500">
             Профиль Supabase ещё не создан — работаете в базовом режиме.
           </p>
-          <SpecialistDashboardPrisma
+          <SpecialistDashboardTabs
             provider={provider}
+            services={services}
             bookings={bookings}
             supabaseConfigured={true}
           />

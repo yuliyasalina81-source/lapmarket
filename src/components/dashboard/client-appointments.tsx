@@ -16,8 +16,9 @@ const STATUS_LABELS: Record<string, string> = {
   confirmed: "Подтверждена",
   completed: "Выполнена",
   cancelled: "Отменена",
-  NEW: "Новая",
+  PENDING: "Ожидает",
   CONFIRMED: "Подтверждена",
+  COMPLETED: "Завершена",
   CANCELLED: "Отменена",
 };
 
@@ -43,6 +44,7 @@ export function ClientAppointments({
     status: string;
     note: string | null;
     provider: { name: string; kind: string };
+    service?: { name: string; price: number } | null;
   }> | null;
 }) {
   const [pending, startTransition] = useTransition();
@@ -129,6 +131,11 @@ export function ClientAppointments({
           className="rounded-2xl border border-stone-100 bg-white p-4"
         >
           <p className="font-semibold text-stone-900">{b.provider.name}</p>
+          {b.service && (
+            <p className="text-sm text-stone-500">
+              {b.service.name} · {formatPrice(b.service.price)}
+            </p>
+          )}
           <p className="text-sm text-stone-500">
             {SERVICE_KIND_LABELS[b.provider.kind as keyof typeof SERVICE_KIND_LABELS]} ·{" "}
             {STATUS_LABELS[b.status] ?? b.status}
@@ -136,7 +143,7 @@ export function ClientAppointments({
           <p className="mt-1 text-sm text-stone-600">
             {new Date(b.scheduledAt).toLocaleString("ru-RU")}
           </p>
-          {b.status !== "CANCELLED" && (
+          {b.status === "PENDING" && (
             <button
               type="button"
               disabled={pending}

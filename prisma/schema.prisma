@@ -61,9 +61,18 @@ enum ServiceKind {
 }
 
 enum BookingStatus {
-  NEW
+  PENDING
   CONFIRMED
   CANCELLED
+  COMPLETED
+}
+
+enum ServiceCategory {
+  GROOMING
+  VET
+  TRAINING
+  BOARDING
+  OTHER
 }
 
 enum ContactRequestStatus {
@@ -522,28 +531,50 @@ model ServiceProvider {
 
   user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   media    MediaAsset?       @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  services Service[]
   bookings ServiceBooking[]
   reviews  ServiceReview[]
+}
+
+model Service {
+  id          String          @id @default(cuid())
+  providerId  String
+  name        String
+  description String?         @db.Text
+  price       Int
+  duration    Int
+  category    ServiceCategory
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  provider ServiceProvider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  bookings ServiceBooking[]
+
+  @@index([providerId, isActive])
 }
 
 model ServiceBooking {
   id          String        @id @default(cuid())
   providerId  String
+  serviceId   String?
   userId      String
   petId       String?
   scheduledAt DateTime
   note        String?       @db.Text
-  status      BookingStatus @default(NEW)
+  status      BookingStatus @default(PENDING)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
   provider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service  Service?        @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   user     User            @relation("BookingUser", fields: [userId], references: [id], onDelete: Cascade)
   pet      Pet?            @relation(fields: [petId], references: [id], onDelete: SetNull)
   review   ServiceReview?
 
   @@index([userId])
   @@index([providerId])
+  @@index([serviceId])
 }
 
 model ServiceReview {

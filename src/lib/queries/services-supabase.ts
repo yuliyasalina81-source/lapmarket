@@ -8,7 +8,7 @@ import {
   specialistKindToServiceKind,
 } from "@/lib/services/catalog-types";
 import { createSupabaseServerClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { getServiceProviders, getServiceProviderById } from "@/lib/queries/services";
+import { getServiceProviders, getServiceProviderById, getActiveServicesForProvider, toCatalogService } from "@/lib/queries/services";
 
 export type SpecialistFilters = {
   kind?: ServiceKind;
@@ -122,22 +122,28 @@ export async function getApprovedSpecialists(
   // Fallback на Prisma, если Supabase не настроен
   if (!isSupabaseConfigured()) {
     const prismaRows = await getServiceProviders(filters.kind, filters.city);
-    return prismaRows.map((p) => ({
-      id: p.id,
-      userId: p.userId,
-      name: p.name,
-      kind: p.kind,
-      city: p.city,
-      address: p.address,
-      rating: p.rating,
-      reviewCount: p.reviewCount,
-      priceFrom: p.priceFrom,
-      specialties: p.specialties,
-      verified: p.verified,
-      about: null,
-      media: p.media ? { url: p.media.url } : null,
-      services: [],
-    }));
+    return Promise.all(
+      prismaRows.map(async (p) => {
+        const services = await getActiveServicesForProvider(p.id);
+        const prices = services.map((s) => s.price);
+        return {
+          id: p.id,
+          userId: p.userId,
+          name: p.name,
+          kind: p.kind,
+          city: p.city,
+          address: p.address,
+          rating: p.rating,
+          reviewCount: p.reviewCount,
+          priceFrom: prices.length > 0 ? Math.min(...prices) : p.priceFrom,
+          specialties: p.specialties,
+          verified: p.verified,
+          about: null,
+          media: p.media ? { url: p.media.url } : null,
+          services: services.map(toCatalogService),
+        };
+      })
+    );
   }
 
   const supabase = createSupabaseServerClient();
@@ -192,6 +198,8 @@ export async function getSpecialistById(
   if (!isSupabaseConfigured()) {
     const p = await getServiceProviderById(id);
     if (!p) return null;
+    const services = await getActiveServicesForProvider(p.id);
+    const prices = services.map((s) => s.price);
     return {
       id: p.id,
       userId: p.userId,
@@ -201,12 +209,12 @@ export async function getSpecialistById(
       address: p.address,
       rating: p.rating,
       reviewCount: p.reviewCount,
-      priceFrom: p.priceFrom,
+      priceFrom: prices.length > 0 ? Math.min(...prices) : p.priceFrom,
       specialties: p.specialties,
       verified: p.verified,
       about: null,
       media: p.media ? { url: p.media.url } : null,
-      services: [],
+      services: services.map(toCatalogService),
     };
   }
 

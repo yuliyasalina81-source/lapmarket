@@ -114,6 +114,7 @@ export function ServicesView({
 
       const result = await createServiceBooking(
         bookProvider.id,
+        serviceId,
         scheduledAt,
         note,
         petId || undefined
@@ -131,6 +132,9 @@ export function ServicesView({
 
   const hasSupabaseServices =
     useSupabase && bookProvider && bookProvider.services.length > 0;
+
+  const hasPrismaServices =
+    !useSupabase && bookProvider && bookProvider.services.length > 0;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -261,16 +265,36 @@ export function ServicesView({
                 />
               )}
             </>
+          ) : hasPrismaServices ? (
+            <>
+              <div>
+                <label className="text-sm font-medium text-stone-700">Услуга</label>
+                <select
+                  value={serviceId}
+                  onChange={(e) => setServiceId(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
+                >
+                  {bookProvider!.services.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} — {s.price} ₽ ({s.durationMinutes} мин)
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-stone-700">Дата и время</label>
+                <input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(e) => setScheduledAt(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
+                />
+              </div>
+            </>
           ) : (
-            <div>
-              <label className="text-sm font-medium text-stone-700">Дата и время</label>
-              <input
-                type="datetime-local"
-                value={scheduledAt}
-                onChange={(e) => setScheduledAt(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
-              />
-            </div>
+            <p className="text-sm text-stone-500">
+              У специалиста нет доступных услуг для записи.
+            </p>
           )}
 
           <div>
@@ -287,7 +311,11 @@ export function ServicesView({
             onClick={submitBooking}
             disabled={
               pending ||
-              (hasSupabaseServices ? !slotIso : !scheduledAt)
+              (hasSupabaseServices
+                ? !slotIso
+                : hasPrismaServices
+                  ? !scheduledAt || !serviceId
+                  : true)
             }
             className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
           >
