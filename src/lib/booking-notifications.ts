@@ -148,6 +148,7 @@ export async function notifyBookingEvent(
         title: "Запись создана",
         link: `${baseUrl}/dashboard/client`,
       });
+      console.log("[booking] notifyClient called");
       notifySpecialist(
         specialistName,
         specialistEmail,
@@ -158,6 +159,7 @@ export async function notifyBookingEvent(
           link: `${baseUrl}/dashboard/specialist`,
         }
       );
+      console.log("[booking] notifySpecialist called");
       notifyAdmin("Новая запись на услугу — ЛапМаркет", {
         ...emailBase,
         title: "Новая запись на услугу",

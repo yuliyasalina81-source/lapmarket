@@ -19,6 +19,7 @@ export async function createServiceBooking(
   note?: string,
   petId?: string
 ): Promise<ActionResult> {
+  console.log("[booking] API called");
   try {
     const user = await requireSessionUser();
     const date = new Date(scheduledAt);
@@ -51,6 +52,8 @@ export async function createServiceBooking(
         status: "PENDING",
       },
     });
+
+    console.log("[booking] created", booking.id);
 
     await notifyBookingEvent("CREATED", booking.id);
 
