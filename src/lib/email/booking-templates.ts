@@ -19,10 +19,15 @@ export type BookingEmailData = {
   status: string;
   note?: string | null;
   link?: string;
+  /** Временно: кому предназначалось письмо (пока домен не верифицирован в Resend) */
+  intendedFor?: string;
 };
 
 export function buildBookingEmailHtml(data: BookingEmailData): string {
   const fields: [string, string][] = [
+    ...(data.intendedFor
+      ? [["Предназначалось", data.intendedFor] as [string, string]]
+      : []),
     ["Специалист", data.providerName],
     ...(data.serviceName ? [["Услуга", data.serviceName] as [string, string]] : []),
     ["Клиент", data.clientName],
