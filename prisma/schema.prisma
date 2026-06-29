@@ -67,6 +67,11 @@ enum BookingStatus {
   COMPLETED
 }
 
+enum SlotBookedBy {
+  USER
+  MANUAL
+}
+
 enum ServiceCategory {
   GROOMING
   VET
@@ -529,11 +534,13 @@ model ServiceProvider {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  media    MediaAsset?       @relation(fields: [mediaId], references: [id], onDelete: SetNull)
-  services Service[]
-  bookings ServiceBooking[]
-  reviews  ServiceReview[]
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media          MediaAsset?       @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  services       Service[]
+  bookings       ServiceBooking[]
+  reviews        ServiceReview[]
+  availabilities Availability[]
+  slots          Slot[]
 }
 
 model Service {
@@ -550,6 +557,7 @@ model Service {
 
   provider ServiceProvider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
   bookings ServiceBooking[]
+  slots    Slot[]
 
   @@index([providerId, isActive])
 }
@@ -571,10 +579,47 @@ model ServiceBooking {
   user     User            @relation("BookingUser", fields: [userId], references: [id], onDelete: Cascade)
   pet      Pet?            @relation(fields: [petId], references: [id], onDelete: SetNull)
   review   ServiceReview?
+  slots    Slot[]
 
   @@index([userId])
   @@index([providerId])
   @@index([serviceId])
+}
+
+model Availability {
+  id         String   @id @default(cuid())
+  providerId String
+  dayOfWeek  Int
+  startTime  String
+  endTime    String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId, dayOfWeek, isActive])
+}
+
+model Slot {
+  id         String   @id @default(cuid())
+  providerId String
+  serviceId  String?
+  startAt    DateTime
+  endAt      DateTime
+  isBooked   Boolean  @default(false)
+  bookedBy   SlotBookedBy?
+  bookingId  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider ServiceProvider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service  Service?         @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  booking  ServiceBooking?  @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@unique([providerId, startAt])
+  @@index([providerId, startAt, isBooked])
+  @@index([bookingId])
 }
 
 model ServiceReview {

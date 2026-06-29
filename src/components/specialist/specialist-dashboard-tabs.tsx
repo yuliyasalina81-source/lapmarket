@@ -9,10 +9,12 @@ import { toast } from "sonner";
 import { updatePrismaProviderProfile } from "@/actions/specialist-prisma";
 import { ProviderBookingsView } from "@/components/profile/provider-bookings-view";
 import { ServicesCrudPrisma } from "@/components/specialist/services-crud-prisma";
+import { AvailabilityEditorPrisma } from "@/components/specialist/availability-editor-prisma";
+import { SlotManager } from "@/components/specialist/slot-manager";
 import { SERVICE_KIND_LABELS } from "@/lib/constants";
 import type { ServiceKind, BookingStatus, ServiceCategory } from "@prisma/client";
 
-type Tab = "profile" | "services" | "bookings";
+type Tab = "profile" | "services" | "bookings" | "schedule";
 
 export function SpecialistDashboardTabs({
   provider,
@@ -56,6 +58,7 @@ export function SpecialistDashboardTabs({
   const tabs: { id: Tab; label: string }[] = [
     { id: "profile", label: "Профиль" },
     { id: "services", label: `Услуги (${services.length})` },
+    { id: "schedule", label: "Расписание" },
     { id: "bookings", label: `Записи (${bookings.length})` },
   ];
 
@@ -171,6 +174,19 @@ export function SpecialistDashboardTabs({
       )}
 
       {tab === "services" && <ServicesCrudPrisma services={services} />}
+
+      {tab === "schedule" && (
+        <div className="space-y-4">
+          <AvailabilityEditorPrisma />
+          <SlotManager
+            services={services.map((s) => ({
+              id: s.id,
+              name: s.name,
+              duration: s.duration,
+            }))}
+          />
+        </div>
+      )}
 
       {tab === "bookings" && (
         <section>

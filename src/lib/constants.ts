@@ -53,6 +53,11 @@ export const SERVICE_CATEGORIES = Object.keys(
   SERVICE_CATEGORY_LABELS
 ) as ServiceCategory[];
 
+/** Допустимые длительности услуг (минуты). */
+export const SERVICE_DURATIONS = [15, 30, 45, 60, 90, 120] as const;
+
+export type ServiceDuration = (typeof SERVICE_DURATIONS)[number];
+
 /** URL демо-изображений (Unsplash) для сидов и заглушек. */
 export const DEMO_IMAGE_URLS = {
   dog: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80",

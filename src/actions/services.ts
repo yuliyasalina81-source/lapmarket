@@ -5,9 +5,33 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSessionUser } from "@/lib/session";
 import { notifyBookingEvent } from "@/lib/booking-notifications";
-import type { BookingStatus } from "@prisma/client";
+import { SLOT_STEP_MINUTES, slotsNeeded } from "@/lib/services/prisma-slots";
+import type { BookingStatus, Prisma } from "@prisma/client";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
+
+type Tx = Prisma.TransactionClient;
+
+async function findConsecutiveFreeSlots(
+  tx: Tx,
+  providerId: string,
+  firstSlot: { id: string; startAt: Date },
+  count: number
+) {
+  const slots = [firstSlot];
+  for (let i = 1; i < count; i++) {
+    const expectedStart = new Date(
+      firstSlot.startAt.getTime() + i * SLOT_STEP_MINUTES * 60_000
+    );
+    const slot = await tx.slot.findFirst({
+      where: { providerId, startAt: expectedStart, isBooked: false },
+      select: { id: true, startAt: true },
+    });
+    if (!slot) return null;
+    slots.push(slot);
+  }
+  return slots;
+}
 
 /**
  * Создаёт запись на услугу к провайдеру (Prisma ServiceBooking).
@@ -17,7 +41,8 @@ export async function createServiceBooking(
   serviceId: string,
   scheduledAt: string,
   note?: string,
-  petId?: string
+  petId?: string,
+  slotId?: string
 ): Promise<ActionResult> {
   console.log("[booking] API called");
   try {
@@ -41,16 +66,64 @@ export async function createServiceBooking(
       if (!pet) return { ok: false, error: "Питомец не найден" };
     }
 
-    const booking = await prisma.serviceBooking.create({
-      data: {
-        providerId,
-        serviceId,
-        userId: user.id,
-        petId: petId || undefined,
-        scheduledAt: date,
-        note: note?.trim(),
-        status: "PENDING",
-      },
+    const needed = slotsNeeded(service.duration);
+
+    const booking = await prisma.$transaction(async (tx) => {
+      let firstSlot: { id: string; startAt: Date } | null = null;
+
+      if (slotId) {
+        firstSlot = await tx.slot.findFirst({
+          where: { id: slotId, providerId, isBooked: false },
+          select: { id: true, startAt: true },
+        });
+      } else {
+        firstSlot = await tx.slot.findFirst({
+          where: { providerId, startAt: date, isBooked: false },
+          select: { id: true, startAt: true },
+        });
+      }
+
+      if (slotId && !firstSlot) {
+        throw new Error("SLOT_UNAVAILABLE");
+      }
+
+      if (firstSlot) {
+        const chain = await findConsecutiveFreeSlots(tx, providerId, firstSlot, needed);
+        if (!chain) {
+          if (slotId) throw new Error("SLOT_UNAVAILABLE");
+        } else {
+          const created = await tx.serviceBooking.create({
+            data: {
+              providerId,
+              serviceId,
+              userId: user.id,
+              petId: petId || undefined,
+              scheduledAt: firstSlot.startAt,
+              note: note?.trim(),
+              status: "PENDING",
+            },
+          });
+
+          await tx.slot.updateMany({
+            where: { id: { in: chain.map((s) => s.id) } },
+            data: { isBooked: true, bookingId: created.id, bookedBy: "USER" },
+          });
+
+          return created;
+        }
+      }
+
+      return tx.serviceBooking.create({
+        data: {
+          providerId,
+          serviceId,
+          userId: user.id,
+          petId: petId || undefined,
+          scheduledAt: date,
+          note: note?.trim(),
+          status: "PENDING",
+        },
+      });
     });
 
     console.log("[booking] created", booking.id);
@@ -62,7 +135,10 @@ export async function createServiceBooking(
     revalidatePath("/services");
     revalidatePath(`/specialist/${providerId}`);
     return { ok: true };
-  } catch {
+  } catch (e) {
+    if (e instanceof Error && e.message === "SLOT_UNAVAILABLE") {
+      return { ok: false, error: "Выбранное время уже занято" };
+    }
     return { ok: false, error: "Не удалось создать запись" };
   }
 }
@@ -102,9 +178,18 @@ export async function updateBookingStatus(
       return { ok: false, error: "Подтвердить можно только ожидающую запись" };
     }
 
-    await prisma.serviceBooking.update({
-      where: { id: bookingId },
-      data: { status },
+    await prisma.$transaction(async (tx) => {
+      await tx.serviceBooking.update({
+        where: { id: bookingId },
+        data: { status },
+      });
+
+      if (status === "CANCELLED") {
+        await tx.slot.updateMany({
+          where: { bookingId },
+          data: { isBooked: false, bookingId: null, bookedBy: null },
+        });
+      }
     });
 
     if (status === "CONFIRMED") {

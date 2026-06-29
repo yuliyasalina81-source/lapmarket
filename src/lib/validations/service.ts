@@ -2,6 +2,7 @@
  * Zod-схемы для услуг специалиста.
  */
 import { z } from "zod";
+import { SERVICE_DURATIONS } from "@/lib/constants";
 
 export const serviceCategorySchema = z.enum([
   "GROOMING",
@@ -11,11 +12,20 @@ export const serviceCategorySchema = z.enum([
   "OTHER",
 ]);
 
+export const serviceDurationSchema = z.coerce
+  .number()
+  .int()
+  .refine(
+    (v): v is (typeof SERVICE_DURATIONS)[number] =>
+      (SERVICE_DURATIONS as readonly number[]).includes(v),
+    "Выберите длительность из списка"
+  );
+
 export const createServiceSchema = z.object({
   name: z.string().trim().min(2, "Название от 2 символов"),
   description: z.string().trim().optional(),
   price: z.coerce.number().int().min(0, "Цена не может быть отрицательной"),
-  duration: z.coerce.number().int().min(1, "Длительность от 1 минуты"),
+  duration: serviceDurationSchema,
   category: serviceCategorySchema,
 });
 

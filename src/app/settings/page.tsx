@@ -13,7 +13,13 @@ export default async function SettingsPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    include: { pets: true },
+    select: {
+      displayName: true,
+      city: true,
+      avatar: true,
+      role: true,
+      passwordHash: true,
+    },
   });
   if (!user) redirect("/login");
 
@@ -26,6 +32,7 @@ export default async function SettingsPage() {
         role: user.role,
         pets: "",
       }}
+      hasPassword={!!user.passwordHash}
     />
   );
 }

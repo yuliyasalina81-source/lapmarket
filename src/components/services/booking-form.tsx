@@ -12,6 +12,7 @@ import { createAppointment } from "@/actions/services-supabase";
 import { createServiceBooking } from "@/actions/services";
 import type { CatalogService } from "@/lib/services/catalog-types";
 import { SlotPicker } from "./slot-picker";
+import { PrismaSlotPicker, type SelectedPrismaSlot } from "./prisma-slot-picker";
 import { formatPrice } from "@/lib/format";
 
 /**
@@ -36,7 +37,7 @@ export function BookingForm({
   const { data: session } = useSession();
   const [serviceId, setServiceId] = useState(services[0]?.id ?? "");
   const [slotIso, setSlotIso] = useState("");
-  const [scheduledAt, setScheduledAt] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState<SelectedPrismaSlot | null>(null);
   const [note, setNote] = useState("");
   const [petId, setPetId] = useState(defaultPetId ?? pets[0]?.id ?? "");
   const [pending, startTransition] = useTransition();
@@ -78,16 +79,17 @@ export function BookingForm({
           toast.error("Выберите услугу");
           return;
         }
-        if (!scheduledAt) {
-          toast.error("Укажите дату и время");
+        if (!selectedSlot) {
+          toast.error("Выберите дату и время");
           return;
         }
         const result = await createServiceBooking(
           specialistId,
           serviceId,
-          scheduledAt,
+          selectedSlot.startAt,
           note,
-          petId || undefined
+          petId || undefined,
+          selectedSlot.id
         );
         if (result.ok) {
           toast.success(`Запись в «${providerName}» создана`);
@@ -106,7 +108,7 @@ export function BookingForm({
     useSupabase && hasServices
       ? !!slotIso && !!serviceId
       : !useSupabase && hasServices
-        ? !!scheduledAt && !!serviceId
+        ? !!selectedSlot && !!serviceId
         : false;
 
   return (
@@ -126,6 +128,7 @@ export function BookingForm({
                 onClick={() => {
                   setServiceId(s.id);
                   setSlotIso("");
+                  setSelectedSlot(null);
                 }}
               >
                 <span className="font-medium text-stone-900">{s.name}</span>
@@ -142,12 +145,12 @@ export function BookingForm({
               value={slotIso}
               onChange={setSlotIso}
             />
-          ) : !useSupabase ? (
-            <input
-              type="datetime-local"
-              value={scheduledAt}
-              onChange={(e) => setScheduledAt(e.target.value)}
-              className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm"
+          ) : !useSupabase && serviceId ? (
+            <PrismaSlotPicker
+              providerId={specialistId}
+              serviceId={serviceId}
+              value={selectedSlot}
+              onChange={setSelectedSlot}
             />
           ) : null}
         </>

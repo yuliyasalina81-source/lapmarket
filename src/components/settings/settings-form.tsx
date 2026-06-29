@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { updateProfile, updateAvatar } from "@/actions/settings";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { PushSettings } from "@/components/pwa/push-settings";
+import { DeleteAccountSection } from "@/components/settings/delete-account-section";
 import type { UserRole } from "@prisma/client";
 
 /**
@@ -16,6 +17,7 @@ import type { UserRole } from "@prisma/client";
  */
 export function SettingsForm({
   user,
+  hasPassword,
 }: {
   user: {
     displayName: string;
@@ -24,6 +26,7 @@ export function SettingsForm({
     role: UserRole;
     pets: string;
   };
+  hasPassword: boolean;
 }) {
   const { update: updateSession } = useSession();
   const [pending, startTransition] = useTransition();
@@ -104,6 +107,7 @@ export function SettingsForm({
         </button>
       </form>
       <PushSettings />
+      <DeleteAccountSection hasPassword={hasPassword} />
     </div>
   );
 }
