@@ -6,11 +6,41 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
+import { getAuthBaseUrl } from "@/lib/auth-url";
+
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+const authBaseUrl = getAuthBaseUrl();
+const isProduction = process.env.NODE_ENV === "production";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: authSecret,
   trustHost: true,
   session: { strategy: "jwt" },
+  cookies: {
+    sessionToken: {
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+      },
+    },
+    csrfToken: {
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+      },
+    },
+    callbackUrl: {
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+      },
+    },
+  },
   pages: {
     signIn: "/login",
   },
@@ -62,14 +92,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async redirect({ url, baseUrl }) {
+      const canonicalBase = authBaseUrl ?? baseUrl.replace(/\/$/, "");
       // Относительный путь — дополняем baseUrl
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (url.startsWith("/")) return `${canonicalBase}${url}`;
       try {
-        if (new URL(url).origin === baseUrl) return url;
+        const target = new URL(url);
+        const base = new URL(canonicalBase);
+        if (target.origin === base.origin) return url;
       } catch {
         /* ignore */
       }
-      return `${baseUrl}/profile`;
+      return `${canonicalBase}/profile`;
     },
     async jwt({ token, user, trigger, session }) {
       // Первый вход: копируем поля из user в JWT

@@ -23,19 +23,35 @@ type SignInResult = {
 /**
  * Проверяет, вернул ли signIn ошибку авторизации
  */
+function hasAuthError(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return /[?&]error=/.test(url);
+}
+
+function resolveAuthErrorMessage(error: string | null): string {
+  switch (error) {
+    case "CredentialsSignin":
+      return "Неверный email или пароль";
+    case "MissingCSRF":
+      return "Сессия входа устарела. Обновите страницу и попробуйте снова.";
+    case "Configuration":
+      return "Ошибка конфигурации входа. Проверьте AUTH_URL и AUTH_SECRET на сервере.";
+    default:
+      return "Не удалось войти. Попробуйте снова.";
+  }
+}
+
 function isSignInFailure(result: unknown): boolean {
   if (result && typeof result === "object" && "error" in result) {
-    const { error, ok } = result as SignInResult;
+    const { error, ok, url } = result as SignInResult;
     if (error) return true;
     if (ok === false) return true;
+    if (hasAuthError(url)) return true;
     return false;
   }
 
   if (typeof result === "string") {
-    return (
-      result.includes("error=CredentialsSignin") ||
-      result.includes("error=credentials")
-    );
+    return hasAuthError(result);
   }
 
   return false;
@@ -64,8 +80,8 @@ export function LoginForm() {
 
   useEffect(() => {
     const authError = searchParams.get("error");
-    if (authError === "CredentialsSignin") {
-      setError("Неверный email или пароль");
+    if (authError) {
+      setError(resolveAuthErrorMessage(authError));
     }
   }, [searchParams]);
 
@@ -104,7 +120,14 @@ export function LoginForm() {
       });
 
       if (isSignInFailure(result)) {
-        setError("Неверный email или пароль");
+        const authError =
+          result &&
+          typeof result === "object" &&
+          "error" in result &&
+          typeof result.error === "string"
+            ? result.error
+            : null;
+        setError(resolveAuthErrorMessage(authError));
         setPending(false);
         return;
       }
@@ -113,14 +136,14 @@ export function LoginForm() {
         result &&
         typeof result === "object" &&
         "url" in result &&
-        typeof result.url === "string"
+        typeof result.url === "string" &&
+        !hasAuthError(result.url)
           ? result.url
           : null;
-      if (resultUrl) {
-        window.location.replace(resultUrl);
-      } else {
-        window.location.replace(safeCallbackRedirect ?? defaultRedirect);
-      }
+
+      router.refresh();
+      router.replace(resultUrl ?? safeCallbackRedirect ?? defaultRedirect);
+      setPending(false);
     } catch {
       setError("Ошибка входа. Попробуйте снова.");
       setPending(false);
